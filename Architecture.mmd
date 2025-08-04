@@ -1,0 +1,14 @@
+---
+config:
+      theme: redux
+---
+flowchart TD
+    U[使用者] --> FE[User Interface]
+    FE --> GW[API Gateway]
+    GW --> JWT[Auth Service /jwt]
+    GW --> GEN[LLM Service /generate]
+    GEN --> Q[Kafka MQ]
+    Q --> Worker[LLM Worker]
+    Worker --> LLM[OpenAI GPT API]
+    Worker --> DB[PostgreSQL]
+    GEN --> DB
