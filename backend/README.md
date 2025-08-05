@@ -64,11 +64,12 @@ kafka-topics.sh --bootstrap-server localhost:9092 --list
 kafka-consumer-groups.sh --bootstrap-server localhost:9092 --list
 ```
 
-## 健康檢查端點
+## API 端點
 
-服務啟動後可透過以下路徑檢查狀態：
+目前提供以下端點：
 
 ```bash
 - `/api/internal/v1/readiness`：回傳服務是否準備完成
 - `/api/internal/v1/liveness`：檢查資料庫與 Kafka 連線，成功則回傳 `{"status": "ok"}`，失敗會回傳 503
+- `/api/public/v1/jwt`：POST 請求，回傳編碼後的 JWT token
 ```
