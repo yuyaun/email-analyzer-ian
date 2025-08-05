@@ -1,0 +1,11 @@
+name: Codex Review Action
+description: "Use OpenAI Codex to review PR code changes"
+
+inputs:
+  openai_api_key:
+    description: "OpenAI API Key"
+    required: true
+
+runs:
+  using: "python"
+  main: "main.py"

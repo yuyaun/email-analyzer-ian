@@ -1,0 +1,44 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# 安裝必要工具
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    aggregate \
+    ca-certificates \
+    curl \
+    dnsutils \
+    fzf \
+    git \
+    gnupg2 \
+    iproute2 \
+    ipset \
+    iptables \
+    jq \
+    less \
+    man-db \
+    procps \
+    unzip \
+    ripgrep \
+    zsh \
+    zstd \
+    yq \
+    sudo \
+    && rm -rf /var/lib/apt/lists/*
+
+# 安裝 gh（GitHub CLI）
+RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | \
+    gpg --dearmor -o /usr/share/keyrings/githubcli-archive-keyring.gpg && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | \
+    tee /etc/apt/sources.list.d/github-cli.list > /dev/null && \
+    apt-get update && \
+    apt-get install -y gh && \
+    rm -rf /var/lib/apt/lists/*
+
+# 安裝 Node.js 和 npm（用於安裝 Codex CLI）
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs && \
+    npm install -g @openai/codex
+
+CMD ["tail", "-f", "/dev/null"]
