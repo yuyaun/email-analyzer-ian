@@ -16,4 +16,3 @@ FrontendAgent
 - 前端框架為（Vue + Tailwind）
 - 協助撰寫單元測試（Jest）
 - 與後端 API 串接邏輯設計（例如 axios, fetch）
-- 分析 Lighthouse Report 並建議優化
