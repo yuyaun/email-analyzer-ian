@@ -15,7 +15,7 @@
 - [ ] 建立 Git 專案與目錄結構（backend、frontend、k8s）
 - [ ] FastAPI 實作 `/jwt`，回傳 JWT token
 - [ ] docker-compose `/backend/docker-compose.yaml` 啟動 PostgreSQL 與 Kafka
-- [ ] backend Dockerfile `/backend/Dockerfile.dev` 可正常 build 與執行
+- [ ] backend Dockerfile `/backend/Dockerfile` 可正常 build 與執行
 - [ ] frontend `frontend`初版 Vue 頁面可顯示並串接後端
 
 ## 輸入資料（Inputs）

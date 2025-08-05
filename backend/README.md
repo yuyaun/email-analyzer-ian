@@ -52,14 +52,6 @@ alembic revision --autogenerate -m "init"
 alembic upgrade head
 ```
 
-## 使用 Codex 生成程式碼
-
-```bash
-export OPENAI_API_KEY=your_openai_api_key
-docker exec -it dev-python zsh
-codex -a never "{PROMPT}"
-```
-
 ## 查詢 Kafka Topic 與 Group
 
 進入 Kafka 容器後執行以下指令：
