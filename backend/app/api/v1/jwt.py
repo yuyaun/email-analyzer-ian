@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from app.core.config import settings
 
-router = APIRouter()
+router = APIRouter(prefix="/public/v1", tags=["public"])
 
 
 class JWTRequest(BaseModel):
@@ -13,7 +13,7 @@ class JWTRequest(BaseModel):
     exp: datetime
 
 
-@router.post("/v1/jwt")
+@router.post("/jwt")
 def generate_jwt(payload: JWTRequest) -> dict:
     data = {"userSn": payload.userSn, "exp": int(payload.exp.timestamp())}
     token = jwt.encode(data, settings.jwt_secret, algorithm="HS256")
