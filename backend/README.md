@@ -73,3 +73,10 @@ kafka-consumer-groups.sh --bootstrap-server localhost:9092 --list
 - `/api/internal/v1/liveness`：檢查資料庫與 Kafka 連線，成功則回傳 `{"status": "ok"}`，失敗會回傳 503
 - `/api/public/v1/jwt`：POST 請求，回傳編碼後的 JWT token
 ```
+
+## Docker build & run
+
+```bash
+docker build -t email-analyzer-ian .
+docker run -d -p 8000:8000 email-analyzer-ian
+```

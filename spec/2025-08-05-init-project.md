@@ -12,11 +12,11 @@
 
 ## 驗收條件（Acceptance Criteria）
 
-- [v] 建立 Git 專案與目錄結構（backend、frontend、k8s）
-- [v] FastAPI 實作 `/api/v1/jwt`，回傳 JWT token
-- [v] docker-compose `/backend/docker-compose.yaml` 啟動 PostgreSQL 與 Kafka
-- [v] backend Dockerfile `/backend/Dockerfile` 可正常 build 與執行
-- [v] frontend `frontend`初版 Vue 頁面可顯示並串接後端
+- [x] 建立 Git 專案與目錄結構（backend、frontend、k8s）
+- [x] FastAPI 實作 `/api/public/v1/jwt`，回傳 JWT token
+- [x] docker-compose `/backend/docker-compose.yaml` 啟動 PostgreSQL 與 Kafka
+- [x] backend Dockerfile `/backend/Dockerfile` 可正常 build 與執行
+- [] frontend `frontend`初版 Vue 頁面可顯示並串接後端
 
 ## 輸入資料（Inputs）
 
