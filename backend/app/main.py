@@ -9,6 +9,7 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+# TODO 未來要處理指定的 CORS origins
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
