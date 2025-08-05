@@ -1,10 +1,14 @@
 import os
+from datetime import datetime, timedelta
+
+import jwt
+import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-import pytest
 
 # Use in-memory SQLite by patching the database engine before app import
 import app.core.database as database
+
 database.engine = create_engine("sqlite:///:memory:")
 database.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=database.engine)
 database.Base.metadata.create_all(bind=database.engine)
@@ -27,6 +31,7 @@ from app.main import app
 
 client = TestClient(app)
 
+
 @pytest.mark.parametrize(
     "url,expected",
     [
@@ -40,3 +45,13 @@ def test_endpoints(url, expected):
     response = client.get(url)
     assert response.status_code == 200
     assert response.json() == expected
+
+
+def test_jwt_token():
+    exp = (datetime.utcnow() + timedelta(minutes=20)).isoformat()
+    payload = {"userSn": "test-user", "exp": exp}
+    response = client.post(f"/{os.getenv('BASE_ROUTER')}/api/jwt", json=payload)
+    assert response.status_code == 200
+    token = response.json()["token"]
+    decoded = jwt.decode(token, "secret", algorithms=["HS256"])
+    assert decoded["userSn"] == "test-user"
