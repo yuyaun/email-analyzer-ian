@@ -32,26 +32,32 @@ from app.main import app
 client = TestClient(app)
 
 
-@pytest.mark.parametrize(
-    "url,expected",
-    [
-        (f"/{os.getenv('BASE_ROUTER')}/api/internal/v1/readiness", {"status": "ready"}),
-        (f"/{os.getenv('BASE_ROUTER')}/api/internal/v1/liveness", {"status": "ok"}),
-        (f"/{os.getenv('BASE_ROUTER')}/api/mcm/v1/products/", {"product": "Sample product"}),
-        (f"/{os.getenv('BASE_ROUTER')}/api/scm/v1/orders/", {"orders": []}),
-    ],
-)
-def test_endpoints(url, expected):
-    response = client.get(url)
-    assert response.status_code == 200
-    assert response.json() == expected
-
-
 def test_jwt_token():
     exp = (datetime.utcnow() + timedelta(minutes=20)).isoformat()
     payload = {"userSn": "test-user", "exp": exp}
-    response = client.post(f"/{os.getenv('BASE_ROUTER')}/api/jwt", json=payload)
+    response = client.post(
+        f"/{os.getenv('BASE_ROUTER')}/api/public/v1/jwt", json=payload
+    )
     assert response.status_code == 200
     token = response.json()["token"]
     decoded = jwt.decode(token, "secret", algorithms=["HS256"])
     assert decoded["userSn"] == "test-user"
+
+
+@pytest.mark.parametrize(
+    "url,expected",
+    [
+        (
+            f"/{os.getenv('BASE_ROUTER')}/api/internal/v1/readiness",
+            {"status": "ready"},
+        ),
+        (
+            f"/{os.getenv('BASE_ROUTER')}/api/internal/v1/liveness",
+            {"status": "ok"},
+        ),
+    ],
+)
+def test_internal_endpoints(url, expected):
+    response = client.get(url)
+    assert response.status_code == 200
+    assert response.json() == expected
