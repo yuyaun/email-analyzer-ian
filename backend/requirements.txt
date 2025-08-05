@@ -9,3 +9,4 @@ pydantic-settings
 apscheduler
 httpx
 pytest
+PyJWT
