@@ -21,7 +21,7 @@
       methods: {
         async fetchToken() {
             const exp = new Date(Date.now() + 20 * 60 * 1000).toISOString();
-            const res = await axios.post('/jwt', { userSn: `dev-user-${exp}`, exp });
+            const res = await axios.post('/api/v1/jwt', { userSn: `dev-user-${exp}`, exp });
           this.token = res.data.token;
         }
       }

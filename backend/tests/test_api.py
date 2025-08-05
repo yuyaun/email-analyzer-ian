@@ -50,7 +50,7 @@ def test_endpoints(url, expected):
 def test_jwt_token():
     exp = (datetime.utcnow() + timedelta(minutes=20)).isoformat()
     payload = {"userSn": "test-user", "exp": exp}
-    response = client.post(f"/{os.getenv('BASE_ROUTER')}/api/jwt", json=payload)
+    response = client.post(f"/{os.getenv('BASE_ROUTER')}/api/v1/jwt", json=payload)
     assert response.status_code == 200
     token = response.json()["token"]
     decoded = jwt.decode(token, "secret", algorithms=["HS256"])

@@ -1,5 +1,5 @@
 from datetime import datetime
-import jwt
+import jwt  # PyJWT library
 from fastapi import APIRouter
 from pydantic import BaseModel
 
@@ -13,7 +13,7 @@ class JWTRequest(BaseModel):
     exp: datetime
 
 
-@router.post("/jwt")
+@router.post("/v1/jwt")
 def generate_jwt(payload: JWTRequest) -> dict:
     data = {"userSn": payload.userSn, "exp": int(payload.exp.timestamp())}
     token = jwt.encode(data, settings.jwt_secret, algorithm="HS256")

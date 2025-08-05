@@ -5,7 +5,7 @@ config:
 flowchart TD
     U[使用者] --> FE[User Interface]
     FE --> GW[API Gateway]
-    GW --> JWT[Auth Service /jwt]
+    GW --> JWT[Auth Service /api/v1/jwt]
     GW --> GEN[LLM Service /generate]
     GEN --> Q[Kafka MQ]
     Q --> Worker[LLM Worker]
