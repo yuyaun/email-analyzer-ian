@@ -42,6 +42,18 @@ def test_jwt_token():
     assert decoded["userSn"] == "test-user"
 
 
+def test_cors_headers():
+    response = client.options(
+        f"/{os.getenv('BASE_ROUTER')}/api/public/v1/jwt",
+        headers={
+            "Origin": "http://localhost:8001",
+            "Access-Control-Request-Method": "POST",
+        },
+    )
+    assert response.status_code == 200
+    assert response.headers.get("access-control-allow-origin") == "http://localhost:8001"
+
+
 @pytest.mark.parametrize(
     "url,expected",
     [
