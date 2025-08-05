@@ -44,7 +44,8 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, computed } from 'vue';
+import axios from 'axios';
 import { generateJWT } from '../utils/jwt';
 
 const content = ref('');
@@ -141,26 +142,23 @@ function handleSubmit() {
     payload.num_suggestions = numSuggestions.value;
   }
 
-  fetch('/generate', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: 'Bearer ' + token.value,
-    },
-    body: JSON.stringify(payload),
-  })
-    .then(async (res) => {
-      if (res.status === 429) {
-        const data = await res.json();
-        throw new Error(data.message + `，請於 ${data.nextAllowedTime} 再試`);
-      }
-      return res.json();
+  axios
+    .post('/generate', payload, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + token.value,
+      },
     })
-    .then((data) => {
-      result.value = data;
+    .then((res) => {
+      result.value = res.data;
     })
     .catch((err) => {
-      errorMsg.value = err.message || '發生錯誤';
+      if (err.response && err.response.status === 429) {
+        const data = err.response.data;
+        errorMsg.value = data.message + `，請於 ${data.nextAllowedTime} 再試`;
+      } else {
+        errorMsg.value = err.message || '發生錯誤';
+      }
     });
 }
 </script>
