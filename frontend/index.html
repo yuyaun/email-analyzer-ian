@@ -20,8 +20,8 @@
       },
       methods: {
         async fetchToken() {
-          const exp = new Date(Date.now() + 20 * 60 * 1000).toISOString();
-          const res = await axios.post('/jwt', { userSn: 'dev-user', exp });
+            const exp = new Date(Date.now() + 20 * 60 * 1000).toISOString();
+            const res = await axios.post('/jwt', { userSn: `dev-user-${exp}`, exp });
           this.token = res.data.token;
         }
       }
