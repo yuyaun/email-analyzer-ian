@@ -27,22 +27,6 @@ services:
     volumes:
       - kafka_data:/bitnami/kafka # Kafka 資料
       - kafka_logs:/opt/bitnami/kafka/logs # Kafka logs（非必要，但建議）
-
-  dev:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: dev-python
-    working_dir: /app
-    volumes:
-      - .:/app
-    depends_on:
-      - postgres
-      - kafka
-    environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-    tty: true
-
 volumes:
   new_pg_data:
   kafka_data:
