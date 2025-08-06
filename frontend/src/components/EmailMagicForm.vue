@@ -62,12 +62,12 @@ let cooldownTimer = null;
 
 const magicOptions = [
   { value: 'dual', label: '標題和預覽文字（雙劍合璧）' },
-  { value: 'title', label: '郵件標題優化（第一印象很重要）' },
-  { value: 'preview', label: '預覽文字建議（吸引眼球的秘訣）' },
-  { value: 'tag', label: '內容關鍵標籤（抓住重點）' },
-  { value: 'spam', label: '垃圾郵件風險檢測（避開垃圾桶的命運）' },
-  { value: 'tone', label: '語氣與情感分析（懂你說話的感覺）' },
-  { value: 'cta', label: '行動號召強化（讓讀者乖乖點擊）' },
+  // { value: 'title', label: '郵件標題優化（第一印象很重要）' },
+  // { value: 'preview', label: '預覽文字建議（吸引眼球的秘訣）' },
+  // { value: 'tag', label: '內容關鍵標籤（抓住重點）' },
+  // { value: 'spam', label: '垃圾郵件風險檢測（避開垃圾桶的命運）' },
+  // { value: 'tone', label: '語氣與情感分析（懂你說話的感覺）' },
+  // { value: 'cta', label: '行動號召強化（讓讀者乖乖點擊）' },
 ];
 
 const showNumSuggestions = computed(() =>
