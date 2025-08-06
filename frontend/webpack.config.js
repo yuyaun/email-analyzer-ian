@@ -1,5 +1,6 @@
 const path = require('path');
 const { VueLoaderPlugin } = require('vue-loader');
+const Dotenv = require('dotenv-webpack');
 
 module.exports = {
   entry: './src/main.js',
@@ -25,7 +26,7 @@ module.exports = {
       }
     ],
   },
-  plugins: [new VueLoaderPlugin()],
+  plugins: [new VueLoaderPlugin(), new Dotenv()],
   resolve: {
     alias: {
       vue: 'vue/dist/vue.esm-bundler.js'

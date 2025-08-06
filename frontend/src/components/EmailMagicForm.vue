@@ -46,7 +46,8 @@
 <script setup>
 import { ref, computed } from 'vue';
 import axios from 'axios';
-import { generateJWT } from '../utils/jwt';
+
+const API_URL = process.env.API_URL;
 
 const content = ref('');
 const generationType = ref('');
@@ -74,8 +75,6 @@ const showNumSuggestions = computed(() =>
   ['dual', 'title', 'preview', 'cta'].includes(generationType.value)
 );
 
-const API_URL = 'http://localhost:8000';
-
 function handleFileUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -92,7 +91,7 @@ function handleFileUpload(e) {
   reader.readAsText(file);
 }
 
-function handleSubmit() {
+async function handleSubmit() {
   errorMsg.value = '';
 
   if (!content.value) {
@@ -128,10 +127,22 @@ function handleSubmit() {
     }
   }, 1000);
 
-  // 產生 JWT
+  // 取得 JWT
   if (!token.value) {
-    const exp = Math.floor(Date.now() / 1000) + 20 * 60;
-    token.value = generateJWT('dev-fe-' + exp, exp);
+    try {
+      const exp = Math.floor(Date.now() / 1000) + 20 * 60;
+      const jwtRes = await axios.post(
+        API_URL + '/email-analyzer/api/public/v1/jwt',
+        {
+          userSn: 'dev-fe-' + exp,
+          exp: new Date(exp * 1000).toISOString(),
+        }
+      );
+      token.value = jwtRes.data.token;
+    } catch (err) {
+      errorMsg.value = err.message || '取得 JWT 失敗';
+      return;
+    }
   }
 
   const payload = {
@@ -144,23 +155,25 @@ function handleSubmit() {
     payload.num_suggestions = numSuggestions.value;
   }
 
-  axios
-    .post(API_URL+'/email-analyzer/api/public/v1/generate', payload, {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + token.value,
-      },
-    })
-    .then((res) => {
-      result.value = res.data;
-    })
-    .catch((err) => {
-      if (err.response && err.response.status === 429) {
-        const data = err.response.data;
-        errorMsg.value = data.message + `，請於 ${data.nextAllowedTime} 再試`;
-      } else {
-        errorMsg.value = err.message || '發生錯誤';
+  try {
+    const res = await axios.post(
+      API_URL + '/email-analyzer/api/public/v1/generate',
+      payload,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + token.value,
+        },
       }
-    });
+    );
+    result.value = res.data;
+  } catch (err) {
+    if (err.response && err.response.status === 429) {
+      const data = err.response.data;
+      errorMsg.value = data.message + `，請於 ${data.nextAllowedTime} 再試`;
+    } else {
+      errorMsg.value = err.message || '發生錯誤';
+    }
+  }
 }
 </script>
