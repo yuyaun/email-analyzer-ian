@@ -1,11 +1,11 @@
 import json
 import os
+
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
-from sqlalchemy import create_engine, text
-from app.core.config import settings
 
-engine = create_engine(settings.database_url)
+from app.core.database import AsyncSessionLocal
+from app.models.magic_task_result import MagicTaskResult
 
 
 def get_title_optimize_chain():
@@ -26,36 +26,20 @@ chain_map = {
 }
 
 
-def handle_llm_task(message: str) -> None:
+async def handle_llm_task(message: str) -> None:
     data = json.loads(message)
     chain = chain_map.get(data.get("magicType"))
     if chain is None:
         return
-    raw = chain.invoke({"content": data.get("content", "")}).content
+    raw = (await chain.ainvoke({"content": data.get("content", "") })).content
     result = json.loads(raw)
-    with engine.begin() as conn:
-        conn.execute(
-            text(
-                """
-                CREATE TABLE IF NOT EXISTS magic_task_results (
-                    campaign_sn TEXT,
-                    magic_type TEXT,
-                    result JSONB
-                )
-                """
-            )
+    if AsyncSessionLocal is None:
+        return
+    async with AsyncSessionLocal() as db:
+        record = MagicTaskResult(
+            campaign_sn=data.get("campaignSn"),
+            magic_type=data.get("magicType"),
+            result=result,
         )
-        conn.execute(
-            text(
-                """
-                INSERT INTO magic_task_results (campaign_sn, magic_type, result)
-                VALUES (:campaign_sn, :magic_type, :result::jsonb)
-                """
-            ),
-            {
-                "campaign_sn": data.get("campaignSn"),
-                "magic_type": data.get("magicType"),
-                "result": json.dumps(result),
-            },
-        )
-
+        db.add(record)
+        await db.commit()
