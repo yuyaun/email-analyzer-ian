@@ -74,6 +74,8 @@ const showNumSuggestions = computed(() =>
   ['dual', 'title', 'preview', 'cta'].includes(generationType.value)
 );
 
+const API_URL = 'http://localhost:8000';
+
 function handleFileUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -143,7 +145,7 @@ function handleSubmit() {
   }
 
   axios
-    .post('/generate', payload, {
+    .post(API_URL+'/email-analyzer/api/public/v1/generate', payload, {
       headers: {
         'Content-Type': 'application/json',
         Authorization: 'Bearer ' + token.value,
