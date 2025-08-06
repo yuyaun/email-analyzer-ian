@@ -7,7 +7,7 @@
 - 上傳 `.txt` / `.html` 郵件內容（限制 1MB）
 - 可輸入郵件內容，選擇「魔法類型」進行優化建議
 - 具備冷卻倒數（防止暴力連點）
-- 自動產生 JWT 串接後端 API (`/jwt`, `/generate`)
+- 首次呼叫會透過 `/jwt` 取得 JWT 後再串接 `/generate`
 - 支援多種郵件優化模式（標題、預覽、情感分析、風險檢測等）
 - 防止內容未變更重複送出
 - 可處理伺服器 429 次數過多錯誤
@@ -17,6 +17,9 @@
 ```bash
 # 安裝依賴
 npm install
+
+# 設定 API 位置
+echo "API_URL=http://localhost:8000" > .env
 
 # 啟動開發伺服器 (http://localhost:8080)
 npm run dev
@@ -32,10 +35,8 @@ frontend_vue_project/
 │   ├── main.js              # Vue 入口
 │   ├── App.vue              # App 容器
 │   ├── assets/tailwind.css  # Tailwind 設定
-│   ├── components/
-│   │   └── EmailMagicForm.vue  # 主表單元件
-│   └── utils/
-│       └── jwt.js           # JWT 產生工具
+│   └── components/
+│       └── EmailMagicForm.vue  # 主表單元件
 ├── tailwind.config.js
 ├── postcss.config.js
 ├── webpack.config.js
@@ -47,13 +48,13 @@ frontend_vue_project/
 
 ### /jwt
 
-- 說明：前端首次點擊「用魔法打敗魔法」時，會根據 `userSn` 與 `exp` 組成 JWT，並儲存於記憶體中。
-- 格式：
+- 說明：前端首次點擊「用魔法打敗魔法」時，會呼叫此 API 取得 JWT，並儲存於記憶體中。
+- 範例：
 
 ```json
 {
   "userSn": "dev-fe-1690000000",
-  "exp": 1690001200
+  "exp": "2023-07-21T00:00:00Z"
 }
 ```
 
