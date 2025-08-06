@@ -79,14 +79,30 @@ function handleFileUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
 
+  errorMsg.value = '';
+
+  const ext = file.name.substring(file.name.lastIndexOf('.'));
+  if (!['.txt', '.html'].includes(ext)) {
+    errorMsg.value = '僅支援 .txt 或 .html 檔案';
+    content.value = '';
+    return;
+  }
+
   if (file.size > 1024 * 1024) {
     errorMsg.value = '檔案過大，限制為 1MB';
+    content.value = '';
     return;
   }
 
   const reader = new FileReader();
   reader.onload = () => {
-    content.value = reader.result;
+    const text = reader.result.trim();
+    if (!text) {
+      errorMsg.value = '檔案內容為空';
+      content.value = '';
+      return;
+    }
+    content.value = text;
   };
   reader.readAsText(file);
 }

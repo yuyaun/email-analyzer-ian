@@ -42,6 +42,32 @@ def test_jwt_token():
     assert decoded["userSn"] == "test-user"
 
 
+def _get_token():
+    exp = (datetime.utcnow() + timedelta(minutes=20)).isoformat()
+    payload = {"userSn": "test-user", "exp": exp}
+    response = client.post(f"/{os.getenv('BASE_ROUTER')}/api/public/v1/jwt", json=payload)
+    return response.json()["token"]
+
+
+def test_generate_api():
+    token = _get_token()
+    payload = {
+        "campaignSn": "abc123",
+        "content": "Hello",
+        "generation_type": "dual",
+        "num_suggestions": 1,
+    }
+    response = client.post(
+        f"/{os.getenv('BASE_ROUTER')}/api/public/v1/generate",
+        json=payload,
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "success"
+    assert len(data["data"]["suggestions"]) == 1
+
+
 def test_cors_headers():
     response = client.options(
         f"/{os.getenv('BASE_ROUTER')}/api/public/v1/jwt",
