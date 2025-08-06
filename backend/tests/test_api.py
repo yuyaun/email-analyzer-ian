@@ -16,8 +16,19 @@ database.Base.metadata.create_all(bind=database.engine)
 import confluent_kafka
 
 
+last_producer = None
+
+
 class DummyProducer:
     def __init__(self, *args, **kwargs):
+        global last_producer
+        last_producer = self
+        self.sent_messages = []
+
+    def produce(self, topic, value):  # pragma: no cover - simple mock
+        self.sent_messages.append((topic, value))
+
+    def flush(self, timeout=None):  # pragma: no cover - simple mock
         pass
 
     def list_topics(self, timeout=1):  # pragma: no cover - simple mock
@@ -53,19 +64,19 @@ def test_generate_api():
     token = _get_token()
     payload = {
         "campaignSn": "abc123",
+        "magicType": "title_optimize",
         "content": "Hello",
-        "generation_type": "dual",
-        "num_suggestions": 1,
     }
     response = client.post(
         f"/{os.getenv('BASE_ROUTER')}/api/public/v1/generate",
         json=payload,
         headers={"Authorization": f"Bearer {token}"},
     )
-    assert response.status_code == 200
+    assert response.status_code == 202
     data = response.json()
-    assert data["status"] == "success"
-    assert len(data["data"]["suggestions"]) == 1
+    assert data["status"] == "queued"
+    assert last_producer is not None
+    assert len(last_producer.sent_messages) == 1
 
 
 def test_cors_headers():
