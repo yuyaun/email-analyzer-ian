@@ -11,7 +11,13 @@ async_engine = None
 AsyncSessionLocal = None
 if not settings.database_url.startswith("sqlite"):
     async_database_url = settings.database_url.replace("+psycopg2", "+asyncpg")
-    async_engine = create_async_engine(async_database_url)
-    AsyncSessionLocal = async_sessionmaker(bind=async_engine, expire_on_commit=False)
+    try:  # pragma: no cover - only exercised when asyncpg is installed
+        async_engine = create_async_engine(async_database_url)
+        AsyncSessionLocal = async_sessionmaker(
+            bind=async_engine, expire_on_commit=False
+        )
+    except ModuleNotFoundError:
+        # asyncpg is an optional dependency; skip async engine creation if missing
+        pass
 
 Base = declarative_base()
