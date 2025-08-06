@@ -4,8 +4,7 @@ import os
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 
-from app.core.database import AsyncSessionLocal
-from app.models.magic_task_result import MagicTaskResult
+from app.services.magic_task_result_service import create_magic_task_result
 
 
 def get_title_optimize_chain():
@@ -33,13 +32,8 @@ async def handle_llm_task(message: str) -> None:
         return
     raw = (await chain.ainvoke({"content": data.get("content", "") })).content
     result = json.loads(raw)
-    if AsyncSessionLocal is None:
-        return
-    async with AsyncSessionLocal() as db:
-        record = MagicTaskResult(
-            campaign_sn=data.get("campaignSn"),
-            magic_type=data.get("magicType"),
-            result=result,
-        )
-        db.add(record)
-        await db.commit()
+    await create_magic_task_result(
+        campaign_sn=data.get("campaignSn"),
+        magic_type=data.get("magicType"),
+        result=result,
+    )
