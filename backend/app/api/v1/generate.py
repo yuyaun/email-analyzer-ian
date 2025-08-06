@@ -1,36 +1,29 @@
+import json
+import jwt
+from confluent_kafka import Producer
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
-import jwt
 
 from app.core.config import settings
 
 router = APIRouter(prefix="/public/v1", tags=["public"])
 security = HTTPBearer()
 
-
-class Suggestion(BaseModel):
-    title: str
-    content: str
+producer = Producer({"bootstrap.servers": settings.kafka_bootstrap_servers})
 
 
 class GenerateRequest(BaseModel):
-    campaignSn: str
+    campaign_sn: str = Field(alias="campaignSn")
+    magic_type: str = Field(alias="magicType")
     content: str
-    generation_type: str
-    num_suggestions: int = Field(1, ge=1, le=5)
-
-
-class GenerateData(BaseModel):
-    suggestions: list[Suggestion]
 
 
 class GenerateResponse(BaseModel):
     status: str
-    data: GenerateData
 
 
-@router.post("/generate", response_model=GenerateResponse)
+@router.post("/generate", response_model=GenerateResponse, status_code=202)
 def generate(
     payload: GenerateRequest,
     credentials: HTTPAuthorizationCredentials = Depends(security),
@@ -40,8 +33,8 @@ def generate(
     except jwt.PyJWTError as exc:  # pragma: no cover - can't trigger easily
         raise HTTPException(status_code=401, detail="Invalid token") from exc
 
-    suggestions = [
-        Suggestion(title=f"建議 {i+1}", content="這是示範內容")
-        for i in range(payload.num_suggestions)
-    ]
-    return GenerateResponse(status="success", data=GenerateData(suggestions=suggestions))
+    data = payload.model_dump(by_alias=True)
+    producer.produce(settings.kafka_topic, json.dumps(data))
+    producer.flush()
+
+    return GenerateResponse(status="queued")
