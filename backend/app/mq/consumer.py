@@ -1,3 +1,5 @@
+"""Kafka 消費者，負責接收訊息並分派處理。"""
+
 import asyncio
 from confluent_kafka import Consumer
 from app.core.config import settings
@@ -9,7 +11,7 @@ conf = {
     "bootstrap.servers": settings.kafka_bootstrap_servers,
     "group.id": settings.kafka_consumer_group,
     "auto.offset.reset": "earliest",
-}
+}  # Kafka 連線與消費者設定
 
 
 async def consume_messages() -> None:

@@ -1,3 +1,5 @@
+"""提供將 LLM 任務加入佇列的公開 API。"""
+
 import json
 import jwt
 from confluent_kafka import Producer
@@ -14,12 +16,16 @@ producer = Producer({"bootstrap.servers": settings.kafka_bootstrap_servers})
 
 
 class GenerateRequest(BaseModel):
+    """使用者提交的產生任務內容。"""
+
     campaign_sn: str = Field(alias="campaignSn")
     magic_type: str = Field(default="title_optimize", alias="magicType")
     content: str
 
 
 class GenerateResponse(BaseModel):
+    """API 回傳的結果格式。"""
+
     status: str
 
 
@@ -28,6 +34,7 @@ def generate(
     payload: GenerateRequest,
     credentials: HTTPAuthorizationCredentials = Depends(security),
 ):
+    """驗證 JWT 並將任務送入 Kafka。"""
     try:
         jwt.decode(credentials.credentials, settings.jwt_secret, algorithms=["HS256"])
     except jwt.PyJWTError as exc:  # pragma: no cover - can't trigger easily

@@ -1,3 +1,5 @@
+"""處理來自 Kafka 的 LLM 任務。"""
+
 import json
 
 from langchain_openai import ChatOpenAI
@@ -16,12 +18,15 @@ from app.core.config import settings
 
 
 class TitleOptimizeResult(BaseModel):
+    """LLM 回傳的標題優化資料格式。"""
+
     title: str = Field(description="優化後的郵件標題")
     sentiment: str = Field(description="郵件的情感")
     is_spam: bool = Field(description="是否為垃圾郵件")
 
 
 def get_title_optimize_chain():
+    """建立標題優化的 Chain。"""
     output_parser = PydanticOutputParser(pydantic_object=TitleOptimizeResult)
 
     system_template = """
@@ -48,6 +53,7 @@ def get_title_optimize_chain():
         ),
     ])
 
+    # 建立 OpenAI LLM 介面
     llm = ChatOpenAI(
         model=settings.openai_model,
         temperature=0,
@@ -65,10 +71,11 @@ def get_title_optimize_chain():
 
 chain_map = {
     "title_optimize": get_title_optimize_chain(),
-}
+}  # 可根據 magic_type 擴充不同 chain
 
 
 async def handle_llm_task(message: str) -> None:
+    """解析並處理 LLM 任務訊息。"""
     log_event("llm_handler", "handle_task", {"message": message})
     data = json.loads(message)
     chain = chain_map.get(data.get("magicType"))
@@ -84,4 +91,5 @@ async def handle_llm_task(message: str) -> None:
         magic_type=data.get("magicType"),
         result=result.dict(),
     )
+
 

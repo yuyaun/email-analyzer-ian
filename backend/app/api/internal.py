@@ -1,3 +1,5 @@
+"""內部使用的監控與健康檢查 API。"""
+
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy.sql import text
 from app.core import database

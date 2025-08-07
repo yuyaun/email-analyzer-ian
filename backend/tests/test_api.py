@@ -1,3 +1,5 @@
+"""API 層級測試，涵蓋 JWT 與產生任務等流程。"""
+
 import os
 from datetime import datetime, timedelta
 
@@ -20,6 +22,8 @@ last_producer = None
 
 
 class DummyProducer:
+    """替代真實 Kafka Producer 的簡易模擬物件。"""
+
     def __init__(self, *args, **kwargs):
         global last_producer
         last_producer = self

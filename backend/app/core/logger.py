@@ -1,3 +1,5 @@
+"""簡易 JSON 格式 logger，記錄系統事件。"""
+
 import logging
 import json
 from datetime import datetime
