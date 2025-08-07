@@ -21,18 +21,28 @@
 - [x] Worker 使用 LangChain 封裝 prompt 並呼叫 GPT-4o Mini
 - [x] GPT 回應結果為 JSON 格式（含標題優化、情感、是否垃圾訊息）
 - [x] Worker 將處理結果寫入 PostgreSQL
+ - [x] Worker 支援一次處理多筆任務並平行運算後批次寫入
 - [x] 撰寫 backend 與 worker 的初版 Kubernetes YAML 檔案
 
 ## 輸入資料（Inputs）
 
 ### /generate 請求範例
 
+一次送入多筆任務，以陣列方式傳遞：
+
 ```json
-{
-  "campaignSn": "abc123",
-  "magicType": "title_optimize",
-  "content": "限時下殺！買一送一活動開跑啦，快邀朋友一起搶購！"
-}
+[
+  {
+    "campaignSn": "abc123",
+    "magicType": "title_optimize",
+    "content": "限時下殺！買一送一活動開跑啦，快邀朋友一起搶購！"
+  },
+  {
+    "campaignSn": "def456",
+    "magicType": "title_optimize",
+    "content": "最後一天！立即入手最優惠的方案"
+  }
+]
 ```
 
 ### JWT 驗證格式（Authorization Header）

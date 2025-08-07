@@ -1,9 +1,11 @@
 """Kafka 消費者，負責接收訊息並分派處理。"""
 
 import asyncio
+import json
 from confluent_kafka import Consumer
 from app.core.config import settings
-from app.mq.handlers.llm_handler import handle_llm_task
+from app.mq.handlers.llm_handler import process_llm_task
+from app.services.magic_task_result_service import create_magic_task_results
 from app.core.logger import log_event
 
 
@@ -15,7 +17,7 @@ conf = {
 
 
 async def consume_messages() -> None:
-    """Continuously poll Kafka and dispatch tasks using a single event loop."""
+    """Continuously poll Kafka, process task lists in parallel and store results."""
 
     log_event("consumer", "connect", {"bootstrap": settings.kafka_bootstrap_servers})
 
@@ -32,12 +34,12 @@ async def consume_messages() -> None:
                 "consumer", "error", {"error": str(msg.error())}, level="ERROR"
             )
             continue
-        log_event(
-            "consumer",
-            "message_received",
-            {"topic": msg.topic(), "value": msg.value().decode("utf-8")},
-        )
-        await handle_llm_task(msg.value().decode("utf-8"))
+        payload = msg.value().decode("utf-8")
+        log_event("consumer", "message_received", {"topic": msg.topic(), "value": payload})
+        data_list = json.loads(payload)
+        tasks = [process_llm_task(item) for item in data_list]
+        results = await asyncio.gather(*tasks)
+        await create_magic_task_results(results)
 
 
 if __name__ == "__main__":

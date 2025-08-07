@@ -1,7 +1,5 @@
 """處理來自 Kafka 的 LLM 任務。"""
 
-import json
-
 from langchain_openai import ChatOpenAI
 from langchain.output_parsers import PydanticOutputParser
 from langchain.prompts import (
@@ -12,7 +10,6 @@ from langchain.prompts import (
 )
 from pydantic import BaseModel, Field
 
-from app.services.magic_task_result_service import create_magic_task_result
 from app.core.logger import log_event
 from app.core.config import settings
 
@@ -74,23 +71,22 @@ chain_map = {
 }  # 可根據 magic_type 擴充不同 chain
 
 
-async def handle_llm_task(message: str) -> None:
-    """解析並處理 LLM 任務訊息。"""
-    log_event("llm_handler", "handle_task", {"message": message})
-    data = json.loads(message)
+async def process_llm_task(data: dict) -> dict:
+    """解析並處理單一 LLM 任務並回傳結果。"""
+    log_event("llm_handler", "handle_task", {"data": data})
     chain = chain_map.get(data.get("magicType"))
     log_event("llm_handler", "chain_selected", {"magicType": data.get("magicType")})
     if chain is None:
-        return
+        return {}
 
     result = await chain.ainvoke({"content": data.get("content", "")})
 
     log_event("llm_handler", "raw_response", {"raw": result.dict()})
-    await create_magic_task_result(
-        campaign_sn=data.get("campaignSn"),
-        magic_type=data.get("magicType"),
-        input_text=data.get("content"),
-        result=result.dict(),
-    )
+    return {
+        "campaign_sn": data.get("campaignSn"),
+        "magic_type": data.get("magicType"),
+        "input_text": data.get("content"),
+        "result": result.dict(),
+    }
 
 
