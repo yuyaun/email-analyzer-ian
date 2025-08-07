@@ -61,18 +61,26 @@ frontend_vue_project/
 ### /generate
 
 - 說明：後續請求皆會帶上 JWT 作為 Bearer Token 串接 API。
-- Request Body:
+- Request Body（一次送入多筆任務，以陣列方式傳遞）：
 
 ```json
-{
-  "campaignSn": "字串識別碼",
-  "content": "郵件內容",
-  "generation_type": "title | preview | spam | ...",
-  "num_suggestions": 2 // 可選，僅部分類型需要
-}
+[
+  {
+    "campaignSn": "abc123",
+    "magicType": "title_optimize",
+    "content": "限時下殺！買一送一活動開跑啦，快邀朋友一起搶購！",
+    "num_suggestions": 2
+  },
+  {
+    "campaignSn": "def456",
+    "magicType": "title_optimize",
+    "content": "最後一天！立即入手最優惠的方案",
+    "num_suggestions": 2
+  }
+]
 ```
 
-- Response 範例：依據不同 `generation_type`，會有不同格式。
+- Response 範例：依據不同 `magicType`，會有不同格式。
 
 ### 錯誤處理（429）
 

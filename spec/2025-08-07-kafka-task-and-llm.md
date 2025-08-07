@@ -35,15 +35,19 @@
   {
     "campaignSn": "abc123",
     "magicType": "title_optimize",
-    "content": "限時下殺！買一送一活動開跑啦，快邀朋友一起搶購！"
+    "content": "限時下殺！買一送一活動開跑啦，快邀朋友一起搶購！",
+    "num_suggestions": 2
   },
   {
     "campaignSn": "def456",
     "magicType": "title_optimize",
-    "content": "最後一天！立即入手最優惠的方案"
+    "content": "最後一天！立即入手最優惠的方案",
+    "num_suggestions": 2
   }
 ]
 ```
+
+`num_suggestions` 用來指定要向 GPT 產生多少筆建議，數值越大則會呼叫 GPT 多次。
 
 ### JWT 驗證格式（Authorization Header）
 
