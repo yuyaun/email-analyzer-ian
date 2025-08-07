@@ -1,6 +1,7 @@
 """API 層級測試，涵蓋 JWT 與產生任務等流程。"""
 
 import os
+import json
 from datetime import datetime, timedelta
 
 import jwt
@@ -66,11 +67,18 @@ def _get_token():
 
 def test_generate_api():
     token = _get_token()
-    payload = {
-        "campaignSn": "abc123",
-        "magicType": "title_optimize",
-        "content": "Hello",
-    }
+    payload = [
+        {
+            "campaignSn": "abc123",
+            "magicType": "title_optimize",
+            "content": "Hello",
+        },
+        {
+            "campaignSn": "def456",
+            "magicType": "title_optimize",
+            "content": "Hi",
+        },
+    ]
     response = client.post(
         f"/{os.getenv('BASE_ROUTER')}/api/public/v1/generate",
         json=payload,
@@ -81,6 +89,9 @@ def test_generate_api():
     assert data["status"] == "queued"
     assert last_producer is not None
     assert len(last_producer.sent_messages) == 1
+    sent_payload = last_producer.sent_messages[0][1]
+    assert isinstance(sent_payload, str)
+    assert len(json.loads(sent_payload)) == 2
 
 
 def test_cors_headers():

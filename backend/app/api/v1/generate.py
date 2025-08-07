@@ -31,16 +31,16 @@ class GenerateResponse(BaseModel):
 
 @router.post("/generate", response_model=GenerateResponse, status_code=202)
 def generate(
-    payload: GenerateRequest,
+    payloads: list[GenerateRequest],
     credentials: HTTPAuthorizationCredentials = Depends(security),
 ):
-    """驗證 JWT 並將任務送入 Kafka。"""
+    """驗證 JWT 並將任務列表送入 Kafka。"""
     try:
         jwt.decode(credentials.credentials, settings.jwt_secret, algorithms=["HS256"])
     except jwt.PyJWTError as exc:  # pragma: no cover - can't trigger easily
         raise HTTPException(status_code=401, detail="Invalid token") from exc
 
-    data = payload.model_dump(by_alias=True)
+    data = [payload.model_dump(by_alias=True) for payload in payloads]
     producer.produce(settings.kafka_topic, json.dumps(data))
     producer.flush()
 

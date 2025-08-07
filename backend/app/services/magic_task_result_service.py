@@ -23,3 +23,22 @@ async def create_magic_task_result(
         await db.refresh(record)
         return record
 
+
+async def create_magic_task_results(records: list[dict]):
+    """批次寫入多筆 LLM 任務結果。"""
+    if AsyncSessionLocal is None:
+        return
+    async with AsyncSessionLocal() as db:
+        db.add_all(
+            [
+                MagicTaskResult(
+                    campaign_sn=r["campaign_sn"],
+                    magic_type=r["magic_type"],
+                    input=r["input_text"],
+                    result=r["result"],
+                )
+                for r in records
+            ]
+        )
+        await db.commit()
+
