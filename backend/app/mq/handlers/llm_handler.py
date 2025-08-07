@@ -89,6 +89,7 @@ async def handle_llm_task(message: str) -> None:
     await create_magic_task_result(
         campaign_sn=data.get("campaignSn"),
         magic_type=data.get("magicType"),
+        input_text=data.get("content"),
         result=result.dict(),
     )
 

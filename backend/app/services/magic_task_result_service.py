@@ -4,7 +4,9 @@ from app.core.database import AsyncSessionLocal
 from app.models.magic_task_result import MagicTaskResult
 
 
-async def create_magic_task_result(campaign_sn: str, magic_type: str, result: dict):
+async def create_magic_task_result(
+    campaign_sn: str, magic_type: str, input_text: str, result: dict
+):
     """將 LLM 任務結果寫入資料庫。"""
     if AsyncSessionLocal is None:
         # 若未安裝 asyncpg 或無法建立非同步引擎，直接跳出
@@ -13,6 +15,7 @@ async def create_magic_task_result(campaign_sn: str, magic_type: str, result: di
         record = MagicTaskResult(
             campaign_sn=campaign_sn,
             magic_type=magic_type,
+            input=input_text,
             result=result,
         )
         db.add(record)
