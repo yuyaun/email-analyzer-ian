@@ -16,7 +16,7 @@ database.engine = create_engine("sqlite:///:memory:")
 database.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=database.engine)
 database.Base.metadata.create_all(bind=database.engine)
 
-import confluent_kafka
+import aiokafka
 
 
 last_producer = None
@@ -30,17 +30,17 @@ class DummyProducer:
         last_producer = self
         self.sent_messages = []
 
-    def produce(self, topic, value):  # pragma: no cover - simple mock
-        self.sent_messages.append((topic, value))
-
-    def flush(self, timeout=None):  # pragma: no cover - simple mock
+    async def start(self):  # pragma: no cover - simple mock
         pass
 
-    def list_topics(self, timeout=1):  # pragma: no cover - simple mock
-        return {}
+    async def stop(self):  # pragma: no cover - simple mock
+        pass
+
+    async def send_and_wait(self, topic, value):  # pragma: no cover - simple mock
+        self.sent_messages.append((topic, value))
 
 
-confluent_kafka.Producer = DummyProducer
+aiokafka.AIOKafkaProducer = DummyProducer
 
 from fastapi.testclient import TestClient
 from app.main import app
@@ -90,8 +90,8 @@ def test_generate_api():
     assert last_producer is not None
     assert len(last_producer.sent_messages) == 1
     sent_payload = last_producer.sent_messages[0][1]
-    assert isinstance(sent_payload, str)
-    assert len(json.loads(sent_payload)) == 2
+    assert isinstance(sent_payload, (bytes, bytearray))
+    assert len(json.loads(sent_payload.decode())) == 2
 
 
 def test_cors_headers():
