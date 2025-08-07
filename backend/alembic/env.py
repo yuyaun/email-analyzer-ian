@@ -1,21 +1,29 @@
+"""Alembic 的主要設定檔，負責初始化資料庫遷移環境。"""
+
+# 標準 logging 設定，用於 Alembic 遷移時輸出訊息
 from logging.config import fileConfig
 import os
 
+# Alembic 需要的 SQLAlchemy 工具
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
+# Alembic 提供的環境控制物件
 from alembic import context
 from dotenv import load_dotenv
 
+# 專案中宣告的 SQLAlchemy Base，讓 Alembic 能偵測模型
 from app.core.database import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
+# 載入 .env 檔案中的環境變數，並從中取得資料庫連線字串
 load_dotenv()
 database_url = os.getenv("DATABASE_URL")
 if database_url:
+    # 將資料庫連線資訊寫入 Alembic 設定，方便指令使用
     config.set_main_option("sqlalchemy.url", database_url)
 
 # Interpret the config file for Python logging.

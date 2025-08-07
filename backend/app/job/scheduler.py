@@ -1,3 +1,5 @@
+"""設定並啟動後台排程工作。"""
+
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from app.job.jobs.cleanup_order import CleanupOrderJob
@@ -15,13 +17,13 @@ def create_scheduler() -> BackgroundScheduler:
         CronTrigger(hour=1, minute=0),
         id="cleanup_order",
         name="cleanup_order",
-    )
+    )  # 每天 01:00 執行一次
     scheduler.add_job(
         SyncProductJob().run,
         CronTrigger(minute=0),
         id="sync_product",
         name="sync_product",
-    )
+    )  # 每小時整點同步產品資訊
     logger.info("Scheduler jobs registered")
     return scheduler
 

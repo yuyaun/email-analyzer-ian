@@ -17,6 +17,7 @@ depends_on = None
 
 
 def upgrade() -> None:
+    """建立 `magic_task_results` 資料表。"""
     op.create_table(
         "magic_task_results",
         sa.Column("id", sa.Integer(), primary_key=True, index=True),
@@ -27,4 +28,5 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    """移除 `magic_task_results` 資料表。"""
     op.drop_table("magic_task_results")
