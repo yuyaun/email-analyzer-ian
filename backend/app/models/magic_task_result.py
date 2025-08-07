@@ -1,6 +1,6 @@
 """SQLAlchemy 模型：儲存 LLM 任務的執行結果。"""
 
-from sqlalchemy import Column, Integer, String, JSON
+from sqlalchemy import Column, Integer, String, JSON, Text, DateTime, func
 from app.core.database import Base
 
 
@@ -12,5 +12,11 @@ class MagicTaskResult(Base):
     id = Column(Integer, primary_key=True, index=True)  # 自增主鍵
     campaign_sn = Column(String)  # 行銷活動流水號
     magic_type = Column(String)  # 任務類型
+    input = Column(Text)  # 原始輸入內容
     result = Column(JSON)  # LLM 回傳的原始結果
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )  # 建立時間
 
