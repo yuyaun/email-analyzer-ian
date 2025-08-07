@@ -16,12 +16,12 @@
 
 ## 驗收條件（Acceptance Criteria）
 
-- [ ]  FastAPI 實作 `/api/public/v1/generate`，驗證 JWT 後推送任務至 Kafka
-- [ ]  建立 LLM Worker，可從 Kafka 消費任務並處理內容
-- [ ]  Worker 使用 LangChain 封裝 prompt 並呼叫 GPT-4o Mini
-- [ ]  GPT 回應結果為 JSON 格式（含標題優化、情感、是否垃圾訊息）
-- [ ]  Worker 將處理結果寫入 PostgreSQL
-- [ ]  撰寫 backend 與 worker 的初版 Kubernetes YAML 檔案
+- [x] FastAPI 實作 `/api/public/v1/generate`，驗證 JWT 後推送任務至 Kafka
+- [x] 建立 LLM Worker，可從 Kafka 消費任務並處理內容
+- [x] Worker 使用 LangChain 封裝 prompt 並呼叫 GPT-4o Mini
+- [ ] GPT 回應結果為 JSON 格式（含標題優化、情感、是否垃圾訊息）
+- [ ] Worker 將處理結果寫入 PostgreSQL
+- [x] 撰寫 backend 與 worker 的初版 Kubernetes YAML 檔案
 
 ## 輸入資料（Inputs）
 
@@ -63,12 +63,12 @@ Authorization: Bearer <your-jwt-token>
 
 ### 範例 magicType 對應表
 
-| magicType | 功能描述 | 對應 Chain 函式 |
-| --- | --- | --- |
-| `title_optimize` | 優化標題文案 | `get_title_optimize_chain()` |
-| `sentiment_detect` | 分析內容情緒傾向 | `get_sentiment_chain()` |
-| `spam_check` | 判斷是否為垃圾訊息 | `get_spam_check_chain()` |
-| `sku_mapping` | 商品描述對應 SKU（RAG） | `get_rag_chain_to_sku()` |
+| magicType          | 功能描述                | 對應 Chain 函式              |
+| ------------------ | ----------------------- | ---------------------------- |
+| `title_optimize`   | 優化標題文案            | `get_title_optimize_chain()` |
+| `sentiment_detect` | 分析內容情緒傾向        | `get_sentiment_chain()`      |
+| `spam_check`       | 判斷是否為垃圾訊息      | `get_spam_check_chain()`     |
+| `sku_mapping`      | 商品描述對應 SKU（RAG） | `get_rag_chain_to_sku()`     |
 
 ### Chain 設計原則
 
@@ -130,44 +130,44 @@ spec:
         app: llm-worker
     spec:
       containers:
-      - name: llm-worker
-        image: your-registry/llm-worker:latest
-        imagePullPolicy: Always
-        envFrom:
-        - configMapRef:
-            name: llm-worker-config
-        resources:
-          requests:
-            cpu: "500m"
-            memory: "512Mi"
-          limits:
-            cpu: "1"
-            memory: "1Gi"
-        livenessProbe:
-          httpGet:
-            path: /healthz
-            port: 8080
-          initialDelaySeconds: 10
-          periodSeconds: 30
-        readinessProbe:
-          httpGet:
-            path: /healthz
-            port: 8080
-          initialDelaySeconds: 5
-          periodSeconds: 10
+        - name: llm-worker
+          image: your-registry/llm-worker:latest
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: llm-worker-config
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
 ```
 
 ---
 
 ## 📄 ConfigMap + YAML 設計原則摘要
 
-| 類型 | 說明 |
-| --- | --- |
-| `ConfigMap` | 集中管理 Kafka、PostgreSQL、OpenAI 金鑰與模型名稱等參數 |
-| `Deployment` | 啟動 worker 容器，從 Kafka 消費並使用 LangChain 處理 |
-| `Probe` | 建議提供 `/healthz` endpoint 讓 K8s 監測健康狀態，避免 Pod 卡死 |
-| `envFrom` | 使用 ConfigMap 簡化環境變數注入 |
-| `resources` | 初步設置適度資源，避免佔用整個節點，可後續依 GPT latency 調整 |
+| 類型         | 說明                                                            |
+| ------------ | --------------------------------------------------------------- |
+| `ConfigMap`  | 集中管理 Kafka、PostgreSQL、OpenAI 金鑰與模型名稱等參數         |
+| `Deployment` | 啟動 worker 容器，從 Kafka 消費並使用 LangChain 處理            |
+| `Probe`      | 建議提供 `/healthz` endpoint 讓 K8s 監測健康狀態，避免 Pod 卡死 |
+| `envFrom`    | 使用 ConfigMap 簡化環境變數注入                                 |
+| `resources`  | 初步設置適度資源，避免佔用整個節點，可後續依 GPT latency 調整   |
 
 ---
 

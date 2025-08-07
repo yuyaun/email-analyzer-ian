@@ -15,7 +15,7 @@ producer = Producer({"bootstrap.servers": settings.kafka_bootstrap_servers})
 
 class GenerateRequest(BaseModel):
     campaign_sn: str = Field(alias="campaignSn")
-    magic_type: str = Field(alias="magicType")
+    magic_type: str = Field(default="title_optimize", alias="magicType")
     content: str
 
 
