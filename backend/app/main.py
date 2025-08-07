@@ -2,10 +2,17 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.router import api_router
-from app.core.database import Base, engine
+from app.core.database import Base
 from app.job import scheduler
+from sqlalchemy.ext.asyncio import create_async_engine
+from app.core.config import settings
 
-Base.metadata.create_all(bind=engine)
+async_engine = create_async_engine(settings.database_url)
+
+async def init_db():
+    async with async_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
 
 app = FastAPI()
 

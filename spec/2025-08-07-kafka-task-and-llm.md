@@ -19,8 +19,8 @@
 - [x] FastAPI 實作 `/api/public/v1/generate`，驗證 JWT 後推送任務至 Kafka
 - [x] 建立 LLM Worker，可從 Kafka 消費任務並處理內容
 - [x] Worker 使用 LangChain 封裝 prompt 並呼叫 GPT-4o Mini
-- [ ] GPT 回應結果為 JSON 格式（含標題優化、情感、是否垃圾訊息）
-- [ ] Worker 將處理結果寫入 PostgreSQL
+- [x] GPT 回應結果為 JSON 格式（含標題優化、情感、是否垃圾訊息）
+- [x] Worker 將處理結果寫入 PostgreSQL
 - [x] 撰寫 backend 與 worker 的初版 Kubernetes YAML 檔案
 
 ## 輸入資料（Inputs）

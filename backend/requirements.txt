@@ -13,3 +13,5 @@ PyJWT
 langchain
 langchain-openai
 pydantic-settings
+asyncpg
+greenlet
