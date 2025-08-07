@@ -24,7 +24,7 @@ load_dotenv()
 database_url = os.getenv("DATABASE_URL")
 if database_url:
     # 將資料庫連線資訊寫入 Alembic 設定，方便指令使用
-    config.set_main_option("sqlalchemy.url", database_url)
+    config.set_main_option("sqlalchemy.url", database_url.replace("postgresql+asyncpg", "postgresql"))
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

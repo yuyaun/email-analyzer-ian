@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = "0002_add_input_created_at_to_magic_task_results"
+revision = "0002_add_input_created_at"
 down_revision = "0001_create_magic_task_results"
 branch_labels = None
 depends_on = None
