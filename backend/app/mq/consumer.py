@@ -4,24 +4,40 @@ from app.core.config import settings
 from app.mq.handlers.llm_handler import handle_llm_task
 from app.core.logger import log_event
 
+
 conf = {
     "bootstrap.servers": settings.kafka_bootstrap_servers,
     "group.id": settings.kafka_consumer_group,
-    "auto.offset.reset": "earliest"
+    "auto.offset.reset": "earliest",
 }
 
-log_event("consumer", "connect", {"bootstrap": settings.kafka_bootstrap_servers})
 
-consumer = Consumer(conf)
-consumer.subscribe([settings.kafka_topic])
+async def consume_messages() -> None:
+    """Continuously poll Kafka and dispatch tasks using a single event loop."""
 
-while True:
-    msg = consumer.poll(1.0)
-    if msg is None:
-        continue
-    if msg.error():
-        log_event("consumer", "error", {"error": str(msg.error())}, level="ERROR")
-        continue
-    log_event("consumer", "message_received", {"topic": msg.topic(), "value": msg.value().decode("utf-8")})
-    asyncio.run(handle_llm_task(msg.value().decode("utf-8")))
+    log_event("consumer", "connect", {"bootstrap": settings.kafka_bootstrap_servers})
+
+    consumer = Consumer(conf)
+    consumer.subscribe([settings.kafka_topic])
+
+    while True:
+        msg = consumer.poll(1.0)
+        if msg is None:
+            await asyncio.sleep(0)
+            continue
+        if msg.error():
+            log_event(
+                "consumer", "error", {"error": str(msg.error())}, level="ERROR"
+            )
+            continue
+        log_event(
+            "consumer",
+            "message_received",
+            {"topic": msg.topic(), "value": msg.value().decode("utf-8")},
+        )
+        await handle_llm_task(msg.value().decode("utf-8"))
+
+
+if __name__ == "__main__":
+    asyncio.run(consume_messages())
     
