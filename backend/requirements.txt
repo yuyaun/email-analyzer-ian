@@ -10,3 +10,6 @@ apscheduler
 httpx
 pytest
 PyJWT
+langchain
+langchain-openai
+pydantic-settings

@@ -26,6 +26,7 @@ chain_map = {
 
 
 async def handle_llm_task(message: str) -> None:
+    print(f"Handling LLM task with message: {message}")
     data = json.loads(message)
     chain = chain_map.get(data.get("magicType"))
     if chain is None:

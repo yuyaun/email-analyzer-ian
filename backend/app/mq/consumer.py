@@ -1,6 +1,7 @@
+import asyncio
 from confluent_kafka import Consumer
 from app.core.config import settings
-from app.mq.handlers.order_handler import handle_order_created
+from app.mq.handlers.llm_handler import handle_llm_task
 from app.core.logger import log_event
 
 conf = {
@@ -21,4 +22,6 @@ while True:
     if msg.error():
         log_event("consumer", "error", {"error": str(msg.error())}, level="ERROR")
         continue
-    handle_order_created(msg.value().decode("utf-8"))
+    log_event("consumer", "message_received", {"topic": msg.topic(), "value": msg.value().decode("utf-8")})
+    asyncio.run(handle_llm_task(msg.value().decode("utf-8")))
+    
