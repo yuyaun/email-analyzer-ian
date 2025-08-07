@@ -79,14 +79,18 @@ async def process_llm_task(data: dict) -> dict:
     if chain is None:
         return {}
 
-    result = await chain.ainvoke({"content": data.get("content", "")})
+    num = int(data.get("num_suggestions", 1) or 1)
+    results = []
+    for _ in range(max(1, num)):
+        res = await chain.ainvoke({"content": data.get("content", "")})
+        results.append(res.dict())
 
-    log_event("llm_handler", "raw_response", {"raw": result.dict()})
+    log_event("llm_handler", "raw_response", {"raw": results})
     return {
         "campaign_sn": data.get("campaignSn"),
         "magic_type": data.get("magicType"),
         "input_text": data.get("content"),
-        "result": result.dict(),
+        "result": results,
     }
 
 

@@ -21,6 +21,7 @@ class GenerateRequest(BaseModel):
     campaign_sn: str = Field(alias="campaignSn")
     magic_type: str = Field(default="title_optimize", alias="magicType")
     content: str
+    num_suggestions: int = Field(default=1)
 
 
 class GenerateResponse(BaseModel):

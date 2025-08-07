@@ -72,11 +72,13 @@ def test_generate_api():
             "campaignSn": "abc123",
             "magicType": "title_optimize",
             "content": "Hello",
+            "num_suggestions": 2,
         },
         {
             "campaignSn": "def456",
             "magicType": "title_optimize",
             "content": "Hi",
+            "num_suggestions": 2,
         },
     ]
     response = client.post(
@@ -91,7 +93,9 @@ def test_generate_api():
     assert len(last_producer.sent_messages) == 1
     sent_payload = last_producer.sent_messages[0][1]
     assert isinstance(sent_payload, (bytes, bytearray))
-    assert len(json.loads(sent_payload.decode())) == 2
+    decoded = json.loads(sent_payload.decode())
+    assert len(decoded) == 2
+    assert all(item.get("num_suggestions") == 2 for item in decoded)
 
 
 def test_cors_headers():
