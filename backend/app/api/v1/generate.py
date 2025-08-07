@@ -2,7 +2,7 @@
 
 import json
 import jwt
-from confluent_kafka import Producer
+from aiokafka import AIOKafkaProducer
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
@@ -12,7 +12,7 @@ from app.core.config import settings
 router = APIRouter(prefix="/public/v1", tags=["public"])
 security = HTTPBearer()
 
-producer = Producer({"bootstrap.servers": settings.kafka_bootstrap_servers})
+producer: AIOKafkaProducer | None = None
 
 
 class GenerateRequest(BaseModel):
@@ -30,7 +30,7 @@ class GenerateResponse(BaseModel):
 
 
 @router.post("/generate", response_model=GenerateResponse, status_code=202)
-def generate(
+async def generate(
     payloads: list[GenerateRequest],
     credentials: HTTPAuthorizationCredentials = Depends(security),
 ):
@@ -40,8 +40,16 @@ def generate(
     except jwt.PyJWTError as exc:  # pragma: no cover - can't trigger easily
         raise HTTPException(status_code=401, detail="Invalid token") from exc
 
+    global producer
+    if producer is None:
+        producer = AIOKafkaProducer(
+            bootstrap_servers=settings.kafka_bootstrap_servers
+        )
+        await producer.start()
+
     data = [payload.model_dump(by_alias=True) for payload in payloads]
-    producer.produce(settings.kafka_topic, json.dumps(data))
-    producer.flush()
+    await producer.send_and_wait(
+        settings.kafka_topic, json.dumps(data).encode("utf-8")
+    )
 
     return GenerateResponse(status="queued")
