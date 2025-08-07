@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     kafka_consumer_group: str = f"{env}-{app}"
     database_url: str = "postgresql+psycopg2://postgres:password@localhost:5432/postgres"
     jwt_secret: str = "secret"
+    openai_model: str = "gpt-4o-mini"
+    openai_api_key: str = ""
 
 
 settings = Settings()
