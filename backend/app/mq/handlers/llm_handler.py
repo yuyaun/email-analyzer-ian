@@ -1,11 +1,11 @@
 import json
-import os
 
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 
 from app.services.magic_task_result_service import create_magic_task_result
 from app.core.logger import log_event
+from app.core.config import settings
 
 
 def get_title_optimize_chain():
@@ -14,9 +14,9 @@ def get_title_optimize_chain():
         "以 JSON 格式回傳，包含 title, sentiment, is_spam。內容: {content}"
     )
     llm = ChatOpenAI(
-        model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+        model=settings.openai_model,
         temperature=0,
-        api_key=os.getenv("OPENAI_API_KEY"),
+        api_key=settings.openai_api_key,
     )
     return prompt | llm
 
