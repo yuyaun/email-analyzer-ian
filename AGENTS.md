@@ -28,10 +28,6 @@
   - `spec/`：需求規格與技術文件
   - `k8s/`：Kubernetes 部署設定
 
-- 新增資料夾說明：
-  - `agents/`：存放各類自動化 AI Agent 角色檔案
-  - `spec/`：存放專案需求、API 規格、架構設計等文件
-
 ## 前端技術需求 (Frontend Technical Requirements)
 
 - 使用 Vue.js 實作前端頁面
@@ -42,7 +38,6 @@
 ## 技術需求（Technical Requirements）
 
 - 使用 FastAPI 實作 API
-- 整合 LINE Login API 進行用戶驗證
 - 使用 PostgreSQL 儲存團購參與者資料
 - 使用 Alembic 管理資料庫遷移
 - 使用 Kafka 發佈事件（如有需要）
