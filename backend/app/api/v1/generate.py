@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field
 from app.core.config import settings
 from app.memory_store import save_task_result
 from app.mq import producer
+from app.core.logger import log_event
 
 router = APIRouter(prefix="/public/v1", tags=["public"])
 security = HTTPBearer()
@@ -72,9 +73,11 @@ async def _consume_results() -> None:
         group_id=f"{settings.kafka_consumer_group}-result",
         auto_offset_reset="earliest",
     )
+    print("Starting Kafka consumer for results...")
     await consumer.start()
     try:
         async for msg in consumer:
+            log_event("llm_handler", "consume_result", {"message": msg.value.decode("utf-8")})
             data = json.loads(msg.value.decode("utf-8"))
             for item in data:
                 task_id = item.get("campaign_sn")
