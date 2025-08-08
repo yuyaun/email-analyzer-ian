@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     jwt_secret: str = "secret"
     openai_model: str = "gpt-4o-mini"
     openai_api_key: str = ""
-    generate_rate_limit: str = "10/minute"
+    generate_rate_limit: str = "3/minute"
 
 
 settings = Settings()  # Exposed settings instance
