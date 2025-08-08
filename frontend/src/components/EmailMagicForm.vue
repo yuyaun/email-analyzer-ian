@@ -38,7 +38,16 @@
 
     <div v-if="result" class="mt-6">
       <h2 class="font-bold mb-2">✨ 魔法建議結果：</h2>
-      <pre class="bg-gray-100 p-3 rounded whitespace-pre-wrap">{{ JSON.stringify(result, null, 2) }}</pre>
+      <div v-if="result.magic_type === 'title_optimize'">
+        <div v-for="(item, idx) in suggestions" :key="idx" class="mb-4">
+          <p class="font-bold">標題：{{ item.title }}</p>
+          <p>預覽文字：{{ item.preheader }}</p>
+        </div>
+      </div>
+      <pre
+        v-else
+        class="bg-gray-100 p-3 rounded whitespace-pre-wrap"
+      >{{ JSON.stringify(result, null, 2) }}</pre>
     </div>
   </div>
 </template>
@@ -60,6 +69,13 @@ const errorMsg = ref('');
 const cooldown = ref(false);
 const countdown = ref(10);
 let cooldownTimer = null;
+
+const suggestions = computed(() => {
+  if (!result.value || !result.value.result) return [];
+  return Array.isArray(result.value.result)
+    ? result.value.result
+    : [result.value.result];
+});
 
 const magicOptions = [
   { value: 'title_optimize', label: '標題和預覽文字（雙劍合璧）' },
@@ -112,6 +128,16 @@ async function handleSubmit() {
 
   if (!content.value) {
     errorMsg.value = '郵件內容為空';
+    return;
+  }
+
+  if (showNumSuggestions.value && numSuggestions.value > 3) {
+    errorMsg.value = '最多只能選 3 個點子唷！';
+    return;
+  }
+
+  if (content.value.length < 50) {
+    errorMsg.value = '字太少囉！至少給 50 個字才能發揮魔法～';
     return;
   }
 
