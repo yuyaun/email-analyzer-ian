@@ -16,9 +16,6 @@ database.engine = create_engine("sqlite:///:memory:")
 database.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=database.engine)
 database.Base.metadata.create_all(bind=database.engine)
 
-import aiokafka
-
-
 last_producer = None
 
 
@@ -57,6 +54,8 @@ class DummyConsumer:
 
 aiokafka.AIOKafkaProducer = DummyProducer
 aiokafka.AIOKafkaConsumer = DummyConsumer
+import app.mq.producer as kafka_producer_module
+
 
 from fastapi.testclient import TestClient
 from app.main import app

@@ -4,7 +4,7 @@ import asyncio
 import json
 from contextlib import suppress
 
-import jwt
+import jwtmemory
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -12,13 +12,13 @@ from pydantic import BaseModel, Field
 
 from app.core.config import settings
 from app.memory_store import save_task_result
+from app.mq import producer
 
 router = APIRouter(prefix="/public/v1", tags=["public"])
 security = HTTPBearer()
 
-producer: AIOKafkaProducer | None = None
+kafka_producer: producer.KafkaProducer | None = None
 result_task: asyncio.Task | None = None
-
 
 class GenerateRequest(BaseModel):
     """使用者提交的產生任務內容。"""
@@ -46,15 +46,18 @@ async def generate(
     except jwt.PyJWTError as exc:  # pragma: no cover - can't trigger easily
         raise HTTPException(status_code=401, detail="Invalid token") from exc
 
-    global producer
-    if producer is None:
-        producer = AIOKafkaProducer(
-            bootstrap_servers=settings.kafka_bootstrap_servers
-        )
-        await producer.start()
+    global kafka_producer
+    if kafka_producer is None:
+        try:
+            kafka_producer = producer.KafkaProducer(
+                bootstrap_servers=settings.kafka_bootstrap_servers
+            )
+            await kafka_producer.start()
+        except RuntimeError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
 
     data = [payload.model_dump(by_alias=True) for payload in payloads]
-    await producer.send_and_wait(
+    await kafka_producer.send_and_wait(
         settings.kafka_topic, json.dumps(data).encode("utf-8")
     )
 

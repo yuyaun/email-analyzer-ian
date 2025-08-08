@@ -3,8 +3,8 @@
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy.sql import text
 from app.core import database
-from aiokafka import AIOKafkaProducer
 from app.core.config import settings
+from app.mq import producer
 
 router = APIRouter(prefix="/internal/v1", tags=["internal"])
 
@@ -21,11 +21,16 @@ async def liveness() -> dict:
     try:
         with database.SessionLocal() as session:
             session.execute(text("SELECT 1"))
-        producer = AIOKafkaProducer(
-            bootstrap_servers=settings.kafka_bootstrap_servers
+        kafka = producer.KafkaProducer(
+            bootstrap_servers=settings.kafka_bootstrap_servers,
         )
-        await producer.start()
-        await producer.stop()
+        await kafka.start()
+        await kafka.stop()
+    except RuntimeError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(exc),
+        ) from exc
     except Exception as exc:  # pragma: no cover - error path
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
