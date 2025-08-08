@@ -84,8 +84,16 @@ def _get_token():
     return response.json()["token"]
 
 
-def test_generate_api():
+def test_generate_api(monkeypatch):
     token = _get_token()
+
+    async def fake_get_result(task_id):
+        return {"task_id": task_id, "value": "ok"}
+
+    import app.api.v1.generate as generate_module
+
+    monkeypatch.setattr(generate_module, "get_task_result_with_lock", fake_get_result)
+
     payload = [
         {
             "campaignSn": "abc123",
@@ -105,16 +113,24 @@ def test_generate_api():
         json=payload,
         headers={"Authorization": f"Bearer {token}"},
     )
-    assert response.status_code == 202
+    assert response.status_code == 200
     data = response.json()
-    assert data["status"] == "queued"
+    assert data["status"] == "done"
+    assert isinstance(data["result"], list) and len(data["result"]) == 2
+
     assert last_producer is not None
-    assert len(last_producer.sent_messages) == 1
-    sent_payload = last_producer.sent_messages[0][1]
-    assert isinstance(sent_payload, (bytes, bytearray))
-    decoded = json.loads(sent_payload.decode())
-    assert len(decoded) == 2
-    assert all(item.get("num_suggestions") == 2 for item in decoded)
+    assert len(last_producer.sent_messages) == 2
+
+    task_ids = []
+    for _, sent_payload in last_producer.sent_messages:
+        assert isinstance(sent_payload, (bytes, bytearray))
+        decoded = json.loads(sent_payload.decode())
+        assert decoded.get("num_suggestions") == 2
+        assert "task_id" in decoded
+        task_ids.append(decoded["task_id"])
+
+    result_task_ids = [item["task_id"] for item in data["result"]]
+    assert set(result_task_ids) == set(task_ids)
 
 
 def test_cors_headers():
