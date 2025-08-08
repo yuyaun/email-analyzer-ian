@@ -3,9 +3,10 @@
 import logging
 import json
 from datetime import datetime
-
+import os
+APP_NAME = os.getenv("APP_NAME", "myservice")
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("myservice")
+logger = logging.getLogger(APP_NAME)
 
 
 def log_event(agent: str, event: str, data: dict, level: str = "INFO") -> None:
