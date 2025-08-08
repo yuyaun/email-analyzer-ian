@@ -20,7 +20,7 @@ RequirementAgent
 - 自動補齊驗收標準（Acceptance Criteria）
 - 拆解任務為可開發項目（Task List）
 - 產出 API 規格草稿與參數範例
-- 判斷是否需呼叫其他 agent（如：ApiBot、DocsBot）
+- 判斷是否需呼叫其他 agent（如：BackendBot、DocsBot）
 - 分析 `specs/*.md` 檔案並輸出結構化任務與設計說明
 
 ---

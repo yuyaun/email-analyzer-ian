@@ -6,14 +6,13 @@
 
 | Agent 名稱       | 功能描述                           | 檔案位置                     |
 | ---------------- | ---------------------------------- | ---------------------------- |
-| KafkaBot         | 設定與使用 Kafka topic 與 consumer | `agents/KafkaBot.md`         |
-| ApiBot           | 建立 REST API 並維持一致命名與結構 | `agents/ApiBot.md`           |
-| DocsBot          | 撰寫 README、docstring、文件產生器 | `agents/DocsBot.md`          |
-| RefactorBot      | 重構舊有程式碼、改善可讀性與品質   | `agents/RefactorBot.md`      |
+| RequirementAgent | 需求分析與功能規劃                 | `agents/RequirementAgent.md` |
+| BackendAgent     | 後端核心元件設計與維護             | `agents/Backend.md`          |
+| FrontendAgent    | 前端開發與 Vue.js 整合             | `agents/FrontendAgent.md`    |
 | TestGenie        | 自動產生 pytest 測試               | `agents/TestGenie.md`        |
 | BugHunter        | 偵錯與分析程式錯誤                 | `agents/BugHunter.md`        |
-| RequirementAgent | 需求分析與功能規劃                 | `agents/RequirementAgent.md` |
-| FrontendAgent    | 前端開發與 Vue.js 整合             | `agents/FrontendAgent.md`    |
+| DocsBot          | 撰寫 README、docstring、文件產生器 | `agents/DocsBot.md`          |
+| RefactorBot      | 重構舊有程式碼、改善可讀性與品質   | `agents/RefactorBot.md`      |
 
 ## 💡 說明
 
