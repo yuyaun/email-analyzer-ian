@@ -8,6 +8,8 @@ import jwt
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+import sys
+import types
 
 # Use in-memory SQLite by patching the database engine before app import
 import app.core.database as database
@@ -15,6 +17,9 @@ import app.core.database as database
 database.engine = create_engine("sqlite:///:memory:")
 database.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=database.engine)
 database.Base.metadata.create_all(bind=database.engine)
+
+aiokafka = types.ModuleType("aiokafka")
+sys.modules["aiokafka"] = aiokafka
 
 last_producer = None
 
@@ -50,7 +55,6 @@ class DummyConsumer:
 
     async def __anext__(self):  # pragma: no cover - simple mock
         raise StopAsyncIteration
-
 
 aiokafka.AIOKafkaProducer = DummyProducer
 aiokafka.AIOKafkaConsumer = DummyConsumer

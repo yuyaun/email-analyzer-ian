@@ -4,7 +4,7 @@ import asyncio
 import json
 from contextlib import suppress
 
-import jwtmemory
+import jwt
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
