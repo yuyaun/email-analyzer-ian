@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field
 
 from app.core.logger import log_event
 from app.core.config import settings
+import asyncio
 
 
 class TitleOptimizeResult(BaseModel):
@@ -81,9 +82,15 @@ async def process_llm_task(data: dict) -> dict:
 
     num = int(data.get("num_suggestions", 1) or 1)
     results = []
-    for _ in range(max(1, num)):
-        res = await chain.ainvoke({"content": data.get("content", "")})
-        results.append(res.dict())
+    async def invoke_chain(content):
+        res = await chain.ainvoke({"content": content})
+        return res.dict()
+
+    tasks = [
+        invoke_chain(data.get("content", ""))
+        for _ in range(max(1, num))
+    ]
+    results = await asyncio.gather(*tasks)
 
     log_event("llm_handler", "raw_response", {"raw": results})
     return {
