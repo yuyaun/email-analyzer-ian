@@ -3,6 +3,8 @@
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 
 # 匯入 API 路由與資料庫設定
 from app.api.router import api_router
@@ -10,6 +12,7 @@ from app.core.database import Base
 from app.job import scheduler
 from sqlalchemy.ext.asyncio import create_async_engine
 from app.core.config import settings
+from app.core.rate_limit import limiter, rate_limit_exceeded_handler
 
 async_engine = create_async_engine(settings.database_url)
 
@@ -21,6 +24,9 @@ async def init_db():
 
 # 建立 FastAPI 主要應用程式實例
 app = FastAPI()
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
 
 # TODO 未來要處理指定的 CORS origins
 app.add_middleware(

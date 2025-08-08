@@ -7,11 +7,12 @@ from uuid import uuid4
 
 import jwt
 from aiokafka import AIOKafkaConsumer
-from fastapi import APIRouter, Depends, HTTPException, FastAPI
+from fastapi import APIRouter, Depends, HTTPException, FastAPI, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
 
 from app.core.config import settings
+from app.core.rate_limit import limiter
 from app.memory_store import save_task_result, get_task_result_with_lock
 from app.mq import producer
 from app.core.logger import log_event
@@ -38,7 +39,9 @@ class GenerateResponse(BaseModel):
 
 
 @router.post("/generate", response_model=GenerateResponse, status_code=200)
+@limiter.limit(settings.generate_rate_limit)
 async def generate(
+    request: Request,
     payloads: list[GenerateRequest],
     credentials: HTTPAuthorizationCredentials = Depends(security),
 ):

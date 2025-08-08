@@ -4,6 +4,8 @@ import os
 import json
 from datetime import datetime, timedelta
 
+os.environ["RATE_LIMIT_REDIS_URL"] = "memory://"
+
 import jwt
 import pytest
 from sqlalchemy import create_engine
@@ -131,6 +133,29 @@ def test_generate_api(monkeypatch):
 
     result_task_ids = [item["task_id"] for item in data["result"]]
     assert set(result_task_ids) == set(task_ids)
+
+
+def test_generate_rate_limit(monkeypatch):
+    token = _get_token()
+
+    async def fake_get_result(task_id):
+        return {"task_id": task_id, "value": "ok"}
+
+    import app.api.v1.generate as generate_module
+
+    monkeypatch.setattr(generate_module, "get_task_result_with_lock", fake_get_result)
+
+    payload = [{"campaignSn": "xyz", "content": "Hi"}]
+    response = None
+    for _ in range(11):
+        response = client.post(
+            f"/{os.getenv('BASE_ROUTER')}/api/public/v1/generate",
+            json=payload,
+            headers={"Authorization": f"Bearer {token}"},
+        )
+    assert response is not None
+    assert response.status_code == 429
+    assert response.json()["message"] == "Too many requests, please try again later."
 
 
 def test_cors_headers():
