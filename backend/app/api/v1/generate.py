@@ -3,15 +3,16 @@
 import asyncio
 import json
 from contextlib import suppress
+from uuid import uuid4
 
 import jwt
-from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
+from aiokafka import AIOKafkaConsumer
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
 
 from app.core.config import settings
-from app.memory_store import save_task_result
+from app.memory_store import save_task_result, get_task_result_with_lock
 from app.mq import producer
 from app.core.logger import log_event
 
@@ -34,14 +35,15 @@ class GenerateResponse(BaseModel):
     """API 回傳的結果格式。"""
 
     status: str
+    result: dict | list[dict] | None = None
 
 
-@router.post("/generate", response_model=GenerateResponse, status_code=202)
+@router.post("/generate", response_model=GenerateResponse, status_code=200)
 async def generate(
     payloads: list[GenerateRequest],
     credentials: HTTPAuthorizationCredentials = Depends(security),
 ):
-    """驗證 JWT 並將任務列表送入 Kafka。"""
+    """驗證 JWT 並將任務列表送入 Kafka，並等待結果回傳。"""
     try:
         jwt.decode(credentials.credentials, settings.jwt_secret, algorithms=["HS256"])
     except jwt.PyJWTError as exc:  # pragma: no cover - can't trigger easily
@@ -57,12 +59,28 @@ async def generate(
         except RuntimeError as exc:
             raise HTTPException(status_code=503, detail=str(exc)) from exc
 
-    data = [payload.model_dump(by_alias=True) for payload in payloads]
-    await kafka_producer.send_and_wait(
-        settings.kafka_topic, json.dumps(data).encode("utf-8")
-    )
+    results: list[dict] = []
+    for payload in payloads:
+        task_id = str(uuid4())
+        data = payload.model_dump(by_alias=True)
+        data["task_id"] = task_id
 
-    return GenerateResponse(status="queued")
+        await kafka_producer.send_and_wait(
+            settings.kafka_topic, json.dumps(data).encode("utf-8")
+        )
+
+        for _ in range(100):
+            result = await get_task_result_with_lock(task_id)
+            if result:
+                results.append(result)
+                break
+            await asyncio.sleep(0.1)
+        else:  # pragma: no cover - timeout branch
+            raise HTTPException(status_code=504, detail="Task result timeout")
+
+    return GenerateResponse(
+        status="done", result=results[0] if len(results) == 1 else results
+    )
 
 
 async def _consume_results() -> None:
@@ -77,12 +95,15 @@ async def _consume_results() -> None:
     await consumer.start()
     try:
         async for msg in consumer:
-            log_event("llm_handler", "consume_result", {"message": msg.value.decode("utf-8")})
+            log_event(
+                "llm_handler",
+                "consume_result",
+                {"message": msg.value.decode("utf-8")},
+            )
             data = json.loads(msg.value.decode("utf-8"))
-            for item in data:
-                task_id = item.get("campaign_sn")
-                if task_id:
-                    await save_task_result(task_id, item)
+            task_id = data.get("task_id")
+            if task_id:
+                await save_task_result(task_id, data)
     finally:
         await consumer.stop()
 
