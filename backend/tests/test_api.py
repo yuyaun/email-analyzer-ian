@@ -92,7 +92,7 @@ def test_generate_api(monkeypatch):
     async def fake_get_result(task_id):
         return {"task_id": task_id, "value": "ok"}
 
-    import app.api.v1.generate as generate_module
+    import app.api.public.v1.generate as generate_module
 
     monkeypatch.setattr(generate_module, "get_task_result_with_lock", fake_get_result)
 
@@ -141,7 +141,7 @@ def test_generate_rate_limit(monkeypatch):
     async def fake_get_result(task_id):
         return {"task_id": task_id, "value": "ok"}
 
-    import app.api.v1.generate as generate_module
+    import app.api.public.v1.generate as generate_module
 
     monkeypatch.setattr(generate_module, "get_task_result_with_lock", fake_get_result)
 

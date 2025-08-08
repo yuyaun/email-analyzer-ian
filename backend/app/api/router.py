@@ -1,8 +1,8 @@
 """整合所有 API 子路由。"""
 
 from fastapi import APIRouter
-from app.api.v1.jwt import router as jwt_router
-from app.api.v1.generate import router as generate_router
+from app.api.public.v1.jwt import router as jwt_router
+from app.api.public.v1.generate import router as generate_router
 from app.api.internal import router as internal_router
 
 
