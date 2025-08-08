@@ -40,8 +40,26 @@
       <h2 class="font-bold mb-2">✨ 魔法建議結果：</h2>
       <div v-if="result.magic_type === 'title_optimize'">
         <div v-for="(item, idx) in suggestions" :key="idx" class="mb-4">
-          <p class="font-bold">標題：{{ item.title }}</p>
-          <p>預覽文字：{{ item.preheader }}</p>
+          <p class="font-bold">
+            標題：{{ item.title }}
+            <button
+              type="button"
+              class="ml-2 text-sm text-blue-600 underline"
+              @click="copyToClipboard(item.title)"
+            >
+              複製
+            </button>
+          </p>
+          <p>
+            預覽文字：{{ item.preheader }}
+            <button
+              type="button"
+              class="ml-2 text-sm text-blue-600 underline"
+              @click="copyToClipboard(item.preheader)"
+            >
+              複製
+            </button>
+          </p>
         </div>
       </div>
       <pre
@@ -121,6 +139,13 @@ function handleFileUpload(e) {
     content.value = text;
   };
   reader.readAsText(file);
+}
+
+function copyToClipboard(text) {
+  // Centralize clipboard logic for reuse and keep template clean
+  navigator.clipboard.writeText(text).catch(() => {
+    // Ignore errors to avoid distracting the user
+  });
 }
 
 async function handleSubmit() {
