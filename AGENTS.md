@@ -4,15 +4,15 @@
 
 ## 🧠 Agents 一覽
 
-| Agent 名稱       | 功能描述                           | 檔案位置                     | 影響範圍  |
-| ---------------- | ---------------------------------- | ---------------------------- | --------- |
-| RequirementAgent | 需求分析與功能規劃                 | `agents/RequirementAgent.md` | /spec     |
-| BackendAgent     | 後端核心元件設計與維護             | `agents/Backend.md`          | /backend  |
-| FrontendAgent    | 前端開發與 Vue.js 整合             | `agents/FrontendAgent.md`    | /frontend |
-| TestGenie        | 自動產生 pytest 測試               | `agents/TestGenie.md`        | 全域      |
-| BugHunter        | 偵錯與分析程式錯誤                 | `agents/BugHunter.md`        | 全域      |
-| DocsBot          | 撰寫 README、docstring、文件產生器 | `agents/DocsBot.md`          | 全域      |
-| RefactorBot      | 重構舊有程式碼、改善可讀性與品質   | `agents/RefactorBot.md`      | 全域      |
+| Agent 名稱       | 功能描述                           | 檔案位置                     | 影響範圍    |
+| ---------------- | ---------------------------------- | ---------------------------- | ----------- |
+| RequirementAgent | 需求分析與功能規劃                 | `agents/RequirementAgent.md` | `/spec`     |
+| BackendAgent     | 後端核心元件設計與維護             | `agents/Backend.md`          | `/backend`  |
+| FrontendAgent    | 前端開發與 Vue.js 整合             | `agents/FrontendAgent.md`    | `/frontend` |
+| TestGenie        | 自動產生 pytest 測試               | `agents/TestGenie.md`        | `all`       |
+| BugHunter        | 偵錯與分析程式錯誤                 | `agents/BugHunter.md`        | `all`       |
+| DocsBot          | 撰寫 README、docstring、文件產生器 | `agents/DocsBot.md`          | `all`       |
+| RefactorBot      | 重構舊有程式碼、改善可讀性與品質   | `agents/RefactorBot.md`      | `all`       |
 
 ## 💡 說明
 
