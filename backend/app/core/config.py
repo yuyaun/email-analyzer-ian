@@ -1,19 +1,19 @@
-"""專案設定管理，讀取環境變數並提供設定值。"""
+"""Application configuration loaded from environment variables."""
 
 from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
 import os
 
-load_dotenv(override=True)  # Load environment variables from .env file, overriding existing ones
+load_dotenv(override=True)  # Override env vars with values from .env file
 env = os.getenv("ENV")
 app = os.getenv("APP_NAME")
 
 
 class Settings(BaseSettings):
-    """集中管理專案設定的 Pydantic 模型。"""
+    """Pydantic model that centralizes application configuration."""
 
-    # 組成 topic 名稱（格式為 `{ENV}.{object}.{action}`）
-    # 建立與監控 consumer group（格式為 `{ENV}-{APP_NAME}`）
+    # Compose topic names as `{ENV}.{object}.{action}`
+    # Configure consumer groups as `{ENV}-{APP_NAME}`
     kafka_bootstrap_servers: str = "localhost:9092"
     kafka_topic: str = f"{env}.order.created"
     kafka_result_topic: str = f"{env}.order.result"
@@ -25,4 +25,4 @@ class Settings(BaseSettings):
     generate_rate_limit: str = "10/minute"
 
 
-settings = Settings()  # 對外使用的設定實例
+settings = Settings()  # Exposed settings instance
