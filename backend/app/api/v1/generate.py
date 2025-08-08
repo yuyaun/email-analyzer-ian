@@ -2,12 +2,12 @@
 
 import asyncio
 import json
-from contextlib import suppress
+from contextlib import asynccontextmanager, suppress
 from uuid import uuid4
 
 import jwt
 from aiokafka import AIOKafkaConsumer
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, FastAPI
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
 
@@ -20,7 +20,6 @@ router = APIRouter(prefix="/public/v1", tags=["public"])
 security = HTTPBearer()
 
 kafka_producer: producer.KafkaProducer | None = None
-result_task: asyncio.Task | None = None
 
 class GenerateRequest(BaseModel):
     """使用者提交的產生任務內容。"""
@@ -109,15 +108,15 @@ async def _consume_results() -> None:
         await consumer.stop()
 
 
-@router.on_event("startup")
-async def _start_consumer() -> None:  # pragma: no cover - simple startup hook
-    global result_task
-    result_task = asyncio.create_task(_consume_results())
-
-
-@router.on_event("shutdown")
-async def _stop_consumer() -> None:  # pragma: no cover - simple shutdown hook
-    if result_task:
-        result_task.cancel()
+@asynccontextmanager
+async def lifespan(_: FastAPI):  # pragma: no cover - simple lifespan hook
+    task = asyncio.create_task(_consume_results())
+    try:
+        yield
+    finally:
+        task.cancel()
         with suppress(Exception):
-            await result_task
+            await task
+
+
+router.lifespan_context = lifespan
