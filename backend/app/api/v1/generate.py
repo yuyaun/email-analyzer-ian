@@ -111,12 +111,20 @@ async def _consume_results() -> None:
 @asynccontextmanager
 async def lifespan(_: FastAPI):  # pragma: no cover - simple lifespan hook
     task = asyncio.create_task(_consume_results())
+    global kafka_producer
+    if kafka_producer is None:
+        try:
+            kafka_producer = producer.KafkaProducer(
+                bootstrap_servers=settings.kafka_bootstrap_servers
+            )
+            await kafka_producer.start()
+        except RuntimeError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
     try:
         yield
     finally:
         task.cancel()
         with suppress(Exception):
             await task
-
 
 router.lifespan_context = lifespan
