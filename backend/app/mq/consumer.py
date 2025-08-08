@@ -2,15 +2,21 @@
 
 import asyncio
 import json
-from aiokafka import AIOKafkaConsumer
 from app.core.config import settings
 from app.mq.handlers.llm_handler import process_llm_task
 from app.services.magic_task_result_service import create_magic_task_results
 from app.core.logger import log_event
 
+try:  # pragma: no cover - optional dependency
+    from aiokafka import AIOKafkaConsumer
+except ModuleNotFoundError:  # pragma: no cover - env without Kafka
+    AIOKafkaConsumer = None  # type: ignore
+
 
 async def consume_messages() -> None:
     """Continuously poll Kafka, process task lists in parallel and store results."""
+    if AIOKafkaConsumer is None:
+        raise RuntimeError("Kafka consumer dependency is not installed")
 
     log_event("consumer", "connect", {"bootstrap": settings.kafka_bootstrap_servers})
 
