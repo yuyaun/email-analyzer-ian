@@ -38,7 +38,14 @@ async def consume_messages() -> None:
             log_event(
                 "consumer", "message_received", {"topic": msg.topic, "value": payload}
             )
-            data_list = json.loads(payload)
+            data = json.loads(payload)
+            if isinstance(data, dict):
+                data_list = [data]
+            elif isinstance(data, list):
+                data_list = data
+            else:
+                log_event("consumer", "invalid_payload", {"value": payload})
+                continue
             tasks = [process_llm_task(item) for item in data_list]
             results = await asyncio.gather(*tasks)
             await create_magic_task_results(results)
