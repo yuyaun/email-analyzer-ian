@@ -1,5 +1,7 @@
 """Database helpers for persisting LLM task results."""
 
+from collections.abc import Iterable
+
 from app.core.database import AsyncSessionLocal
 from app.models.magic_task_result import MagicTaskResult
 
@@ -29,8 +31,8 @@ async def create_magic_task_result(
         return record
 
 
-async def create_magic_task_results(records: list[dict]) -> None:
-    """Persist multiple LLM task results in a batch."""
+async def create_magic_task_results(records: Iterable[dict]) -> None:
+    """Persist multiple LLM task results from any iterable of dictionaries."""
     if AsyncSessionLocal is None:
         return None
     async with AsyncSessionLocal() as db:
