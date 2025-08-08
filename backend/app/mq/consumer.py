@@ -49,9 +49,14 @@ async def consume_messages() -> None:
             tasks = [process_llm_task(item) for item in data_list]
             results = await asyncio.gather(*tasks)
             await create_magic_task_results(results)
-            await producer.send_and_wait(
-                settings.kafka_result_topic, json.dumps(results).encode("utf-8")
-            )
+            for result in results:
+                payload = {
+                    "task_id": result.get("task_id"),
+                    "results": result.get("result"),
+                }
+                await producer.send_and_wait(
+                    settings.kafka_result_topic, json.dumps(payload).encode("utf-8")
+                )
     finally:
         await consumer.stop()
         await producer.stop()

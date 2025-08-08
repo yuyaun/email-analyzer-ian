@@ -102,8 +102,9 @@ async def _consume_results() -> None:
             )
             data = json.loads(msg.value.decode("utf-8"))
             task_id = data.get("task_id")
-            if task_id:
-                await save_task_result(task_id, data)
+            results = data.get("results")
+            if task_id is not None and results is not None:
+                await save_task_result(task_id, results)
     finally:
         await consumer.stop()
 

@@ -94,6 +94,7 @@ async def process_llm_task(data: dict) -> dict:
 
     log_event("llm_handler", "raw_response", {"raw": results})
     return {
+        "task_id": data.get("task_id"),
         "campaign_sn": data.get("campaignSn"),
         "magic_type": data.get("magicType"),
         "input_text": data.get("content"),
