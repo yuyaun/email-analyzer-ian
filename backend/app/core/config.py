@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     # 建立與監控 consumer group（格式為 `{ENV}-{APP_NAME}`）
     kafka_bootstrap_servers: str = "localhost:9092"
     kafka_topic: str = f"{env}.order.created"
+    kafka_result_topic: str = f"{env}.order.result"
     kafka_consumer_group: str = f"{env}-{app}"
     database_url: str = "postgresql+psycopg2://postgres:password@localhost:5432/postgres"
     jwt_secret: str = "secret"

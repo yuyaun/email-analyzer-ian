@@ -1,18 +1,23 @@
-"""提供將 LLM 任務加入佇列的公開 API。"""
+"""提供將 LLM 任務加入佇列並接收結果的公開 API。"""
 
+import asyncio
 import json
+from contextlib import suppress
+
 import jwt
-from aiokafka import AIOKafkaProducer
+from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
 
 from app.core.config import settings
+from app.memory_store import save_task_result
 
 router = APIRouter(prefix="/public/v1", tags=["public"])
 security = HTTPBearer()
 
 producer: AIOKafkaProducer | None = None
+result_task: asyncio.Task | None = None
 
 
 class GenerateRequest(BaseModel):
@@ -54,3 +59,37 @@ async def generate(
     )
 
     return GenerateResponse(status="queued")
+
+
+async def _consume_results() -> None:
+    """Background task to consume result messages and cache them in memory."""
+    consumer = AIOKafkaConsumer(
+        settings.kafka_result_topic,
+        bootstrap_servers=settings.kafka_bootstrap_servers,
+        group_id=f"{settings.kafka_consumer_group}-result",
+        auto_offset_reset="earliest",
+    )
+    await consumer.start()
+    try:
+        async for msg in consumer:
+            data = json.loads(msg.value.decode("utf-8"))
+            for item in data:
+                task_id = item.get("campaign_sn")
+                if task_id:
+                    await save_task_result(task_id, item)
+    finally:
+        await consumer.stop()
+
+
+@router.on_event("startup")
+async def _start_consumer() -> None:  # pragma: no cover - simple startup hook
+    global result_task
+    result_task = asyncio.create_task(_consume_results())
+
+
+@router.on_event("shutdown")
+async def _stop_consumer() -> None:  # pragma: no cover - simple shutdown hook
+    if result_task:
+        result_task.cancel()
+        with suppress(Exception):
+            await result_task

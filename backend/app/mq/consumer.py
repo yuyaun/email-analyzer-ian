@@ -2,7 +2,7 @@
 
 import asyncio
 import json
-from aiokafka import AIOKafkaConsumer
+from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 from app.core.config import settings
 from app.mq.handlers.llm_handler import process_llm_task
 from app.services.magic_task_result_service import create_magic_task_results
@@ -20,7 +20,9 @@ async def consume_messages() -> None:
         group_id=settings.kafka_consumer_group,
         auto_offset_reset="earliest",
     )
+    producer = AIOKafkaProducer(bootstrap_servers=settings.kafka_bootstrap_servers)
     await consumer.start()
+    await producer.start()
     try:
         async for msg in consumer:
             payload = msg.value.decode("utf-8")
@@ -31,8 +33,12 @@ async def consume_messages() -> None:
             tasks = [process_llm_task(item) for item in data_list]
             results = await asyncio.gather(*tasks)
             await create_magic_task_results(results)
+            await producer.send_and_wait(
+                settings.kafka_result_topic, json.dumps(results).encode("utf-8")
+            )
     finally:
         await consumer.stop()
+        await producer.stop()
 
 
 if __name__ == "__main__":
