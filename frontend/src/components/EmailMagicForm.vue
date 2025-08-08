@@ -62,7 +62,7 @@ const countdown = ref(10);
 let cooldownTimer = null;
 
 const magicOptions = [
-  { value: 'dual', label: '標題和預覽文字（雙劍合璧）' },
+  { value: 'title_optimize', label: '標題和預覽文字（雙劍合璧）' },
   // { value: 'title', label: '郵件標題優化（第一印象很重要）' },
   // { value: 'preview', label: '預覽文字建議（吸引眼球的秘訣）' },
   // { value: 'tag', label: '內容關鍵標籤（抓住重點）' },
@@ -72,7 +72,7 @@ const magicOptions = [
 ];
 
 const showNumSuggestions = computed(() =>
-  ['dual', 'title', 'preview', 'cta'].includes(generationType.value)
+  ['title_optimize', 'title', 'preview', 'cta'].includes(generationType.value)
 );
 
 function handleFileUpload(e) {
@@ -164,7 +164,7 @@ async function handleSubmit() {
   const payload = {
     campaignSn: btoa(content.value + generationType.value).substring(0, 16),
     content: content.value,
-    generation_type: generationType.value,
+    magic_type: generationType.value,
   };
 
   if (showNumSuggestions.value) {

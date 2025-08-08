@@ -19,8 +19,7 @@ class TitleOptimizeResult(BaseModel):
     """LLM 回傳的標題優化資料格式。"""
 
     title: str = Field(description="優化後的郵件標題")
-    sentiment: str = Field(description="郵件的情感")
-    is_spam: bool = Field(description="是否為垃圾郵件")
+    preheader: str = Field(description="優化後的郵件預覽文字")
 
 
 def get_title_optimize_chain():
@@ -28,7 +27,7 @@ def get_title_optimize_chain():
     output_parser = PydanticOutputParser(pydantic_object=TitleOptimizeResult)
 
     system_template = """
-你是一個郵件行銷助手，請根據內容優化標題並判斷情感與是否為垃圾訊息。
+你是一個郵件行銷助手，請根據內容優化郵件標題 (title) 和預覽文字 (preheader)。
 只輸出 JSON，不要包含額外的說明。
 """
 

@@ -61,8 +61,7 @@ Authorization: Bearer <your-jwt-token>
 ```json
 {
   "title": "買一送一限時優惠，快邀好友一起搶購！",
-  "sentiment": "positive",
-  "is_spam": false
+  "preheader": "解鎖更多精彩內容，點擊查看！"
 }
 ```
 
@@ -76,8 +75,7 @@ Worker 會將每個任務的處理結果逐筆發佈至 `Kafka` 的結果 Topic�
   "results": [
     {
       "title": "買一送一限時優惠，快邀好友一起搶購！",
-      "sentiment": "positive",
-      "is_spam": false
+      "preheader": "解鎖更多精彩內容，點擊查看！"
     }
   ]
 }

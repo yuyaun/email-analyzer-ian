@@ -33,7 +33,7 @@ class GenerateRequest(BaseModel):
 
 class GenerateResponse(BaseModel):
     """API 回傳的結果格式。"""
-
+    magic_type: str
     status: str
     result: dict | list[dict] | None = None
 
@@ -42,7 +42,7 @@ class GenerateResponse(BaseModel):
 @limiter.limit(settings.generate_rate_limit)
 async def generate(
     request: Request,
-    payloads: list[GenerateRequest],
+    payload: GenerateRequest,
     credentials: HTTPAuthorizationCredentials = Depends(security),
 ):
     """驗證 JWT 並將任務列表送入 Kafka，並等待結果回傳。"""
@@ -52,36 +52,26 @@ async def generate(
         raise HTTPException(status_code=401, detail="Invalid token") from exc
 
     global kafka_producer
-    if kafka_producer is None:
-        try:
-            kafka_producer = producer.KafkaProducer(
-                bootstrap_servers=settings.kafka_bootstrap_servers
-            )
-            await kafka_producer.start()
-        except RuntimeError as exc:
-            raise HTTPException(status_code=503, detail=str(exc)) from exc
-
     results: list[dict] = []
-    for payload in payloads:
-        task_id = str(uuid4())
-        data = payload.model_dump(by_alias=True)
-        data["task_id"] = task_id
+    task_id = str(uuid4())
+    data = payload.model_dump(by_alias=True)
+    data["task_id"] = task_id
 
-        await kafka_producer.send_and_wait(
-            settings.kafka_topic, json.dumps(data).encode("utf-8")
-        )
+    await kafka_producer.send_and_wait(
+        settings.kafka_topic, json.dumps(data).encode("utf-8")
+    )
 
-        for _ in range(100):
-            result = await get_task_result_with_lock(task_id)
-            if result:
-                results.append(result)
-                break
-            await asyncio.sleep(0.1)
-        else:  # pragma: no cover - timeout branch
-            raise HTTPException(status_code=504, detail="Task result timeout")
+    for _ in range(100):
+        result = await get_task_result_with_lock(task_id)
+        if result:
+            results.append(result)
+            break
+        await asyncio.sleep(0.1)
+    else:  # pragma: no cover - timeout branch
+        raise HTTPException(status_code=504, detail="Task result timeout")
 
     return GenerateResponse(
-        status="done", result=results[0] if len(results) == 1 else results
+        magic_type=payload.magic_type, status="done", result=results[0] if len(results) == 1 else results
     )
 
 
