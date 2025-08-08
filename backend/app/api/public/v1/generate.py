@@ -45,18 +45,25 @@ async def generate(
     payload: GenerateRequest,
     credentials: HTTPAuthorizationCredentials = Depends(security),
 ):
-    """驗證 JWT 並將任務列表送入 Kafka，並等待結果回傳。"""
+    """驗證 JWT 並將單筆任務送入 Kafka，並等待結果回傳。"""
     try:
         jwt.decode(credentials.credentials, settings.jwt_secret, algorithms=["HS256"])
     except jwt.PyJWTError as exc:  # pragma: no cover - can't trigger easily
         raise HTTPException(status_code=401, detail="Invalid token") from exc
 
     global kafka_producer
-    results: list[dict] = []
+    if kafka_producer is None:
+        try:
+            kafka_producer = producer.KafkaProducer(
+                bootstrap_servers=settings.kafka_bootstrap_servers
+            )
+            await kafka_producer.start()
+        except RuntimeError as exc:  # pragma: no cover - producer init failure
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+
     task_id = str(uuid4())
     data = payload.model_dump(by_alias=True)
     data["task_id"] = task_id
-
     await kafka_producer.send_and_wait(
         settings.kafka_topic, json.dumps(data).encode("utf-8")
     )
@@ -64,15 +71,12 @@ async def generate(
     for _ in range(100):
         result = await get_task_result_with_lock(task_id)
         if result:
-            results.append(result)
-            break
+            return GenerateResponse(
+                magic_type=payload.magic_type, status="done", result=result
+            )
         await asyncio.sleep(0.1)
     else:  # pragma: no cover - timeout branch
         raise HTTPException(status_code=504, detail="Task result timeout")
-
-    return GenerateResponse(
-        magic_type=payload.magic_type, status="done", result=results[0] if len(results) == 1 else results
-    )
 
 
 async def _consume_results() -> None:

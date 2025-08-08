@@ -96,20 +96,12 @@ def test_generate_api(monkeypatch):
 
     monkeypatch.setattr(generate_module, "get_task_result_with_lock", fake_get_result)
 
-    payload = [
-        {
-            "campaignSn": "abc123",
-            "magicType": "title_optimize",
-            "content": "Hello",
-            "num_suggestions": 2,
-        },
-        {
-            "campaignSn": "def456",
-            "magicType": "title_optimize",
-            "content": "Hi",
-            "num_suggestions": 2,
-        },
-    ]
+    payload = {
+        "campaignSn": "abc123",
+        "magicType": "title_optimize",
+        "content": "Hello",
+        "num_suggestions": 2,
+    }
     response = client.post(
         f"/{os.getenv('BASE_ROUTER')}/api/public/v1/generate",
         json=payload,
@@ -118,21 +110,17 @@ def test_generate_api(monkeypatch):
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "done"
-    assert isinstance(data["result"], list) and len(data["result"]) == 2
+    assert isinstance(data["result"], dict)
 
     assert last_producer is not None
-    assert len(last_producer.sent_messages) == 2
+    assert len(last_producer.sent_messages) == 1
 
-    task_ids = []
-    for _, sent_payload in last_producer.sent_messages:
-        assert isinstance(sent_payload, (bytes, bytearray))
-        decoded = json.loads(sent_payload.decode())
-        assert decoded.get("num_suggestions") == 2
-        assert "task_id" in decoded
-        task_ids.append(decoded["task_id"])
-
-    result_task_ids = [item["task_id"] for item in data["result"]]
-    assert set(result_task_ids) == set(task_ids)
+    topic, sent_payload = last_producer.sent_messages[0]
+    assert isinstance(sent_payload, (bytes, bytearray))
+    decoded = json.loads(sent_payload.decode())
+    assert decoded.get("num_suggestions") == 2
+    assert "task_id" in decoded
+    assert data["result"]["task_id"] == decoded["task_id"]
 
 
 def test_generate_rate_limit(monkeypatch):
@@ -145,7 +133,12 @@ def test_generate_rate_limit(monkeypatch):
 
     monkeypatch.setattr(generate_module, "get_task_result_with_lock", fake_get_result)
 
-    payload = [{"campaignSn": "xyz", "content": "Hi"}]
+    payload = {
+        "campaignSn": "xyz",
+        "magicType": "title_optimize",
+        "content": "Hi",
+        "num_suggestions": 1,
+    }
     response = None
     for _ in range(11):
         response = client.post(
