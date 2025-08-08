@@ -2,7 +2,6 @@
 
 from app.core.database import AsyncSessionLocal
 from app.models.magic_task_result import MagicTaskResult
-from typing import Iterable
 
 
 def _to_model(campaign_sn: str, magic_type: str, input_text: str, result: dict) -> MagicTaskResult:
@@ -30,7 +29,7 @@ async def create_magic_task_result(
         return record
 
 
-async def create_magic_task_results(records: Iterable[dict]) -> None:
+async def create_magic_task_results(records: list[dict]) -> None:
     """Persist multiple LLM task results in a batch."""
     if AsyncSessionLocal is None:
         return None
