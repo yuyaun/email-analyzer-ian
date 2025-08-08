@@ -141,6 +141,10 @@ function handleFileUpload(e) {
   reader.readAsText(file);
 }
 
+function utf8ToBase64(str) {
+  return btoa(unescape(encodeURIComponent(str)));
+}
+
 function copyToClipboard(text) {
   // Centralize clipboard logic for reuse and keep template clean
   navigator.clipboard.writeText(text).catch(() => {
@@ -213,7 +217,7 @@ async function handleSubmit() {
   }
 
   const payload = {
-    campaignSn: btoa(content.value + generationType.value).substring(0, 16),
+    campaignSn: utf8ToBase64(content.value + generationType.value).substring(0, 16),
     content: content.value,
     magic_type: generationType.value,
   };
