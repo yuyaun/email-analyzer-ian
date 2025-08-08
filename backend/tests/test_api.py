@@ -36,10 +36,26 @@ class DummyProducer:
     async def send_and_wait(self, topic, value):  # pragma: no cover - simple mock
         self.sent_messages.append((topic, value))
 
+class DummyConsumer:
+    """簡易的 Kafka Consumer 模擬物件。"""
 
+    async def start(self):  # pragma: no cover - simple mock
+        pass
+
+    async def stop(self):  # pragma: no cover - simple mock
+        pass
+
+    def __aiter__(self):  # pragma: no cover - simple mock
+        return self
+
+    async def __anext__(self):  # pragma: no cover - simple mock
+        raise StopAsyncIteration
+
+
+aiokafka.AIOKafkaProducer = DummyProducer
+aiokafka.AIOKafkaConsumer = DummyConsumer
 import app.mq.producer as kafka_producer_module
 
-kafka_producer_module.KafkaProducer = DummyProducer
 
 from fastapi.testclient import TestClient
 from app.main import app
