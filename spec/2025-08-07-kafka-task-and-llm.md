@@ -22,6 +22,7 @@
 - [x] GPT 回應結果為 JSON 格式（含標題優化、情感、是否垃圾訊息）
 - [x] Worker 將處理結果寫入 PostgreSQL
  - [x] Worker 支援一次處理多筆任務並平行運算後批次寫入
+- [x] Worker 逐筆將結果以 `{task_id, results}` 結構發佈至 Kafka 結果 Topic，供 API 端依 `task_id` 取得結果
 - [x] 撰寫 backend 與 worker 的初版 Kubernetes YAML 檔案
 
 ## 輸入資料（Inputs）
@@ -64,6 +65,25 @@ Authorization: Bearer <your-jwt-token>
   "is_spam": false
 }
 ```
+
+### Kafka 結果回傳格式
+
+Worker 會將每個任務的處理結果逐筆發佈至 `Kafka` 的結果 Topic，訊息結構如下：
+
+```json
+{
+  "task_id": "123e4567-e89b-12d3-a456-426614174000",
+  "results": [
+    {
+      "title": "買一送一限時優惠，快邀好友一起搶購！",
+      "sentiment": "positive",
+      "is_spam": false
+    }
+  ]
+}
+```
+
+`task_id` 用於 API 端對應原始請求，`results` 為 LLM 產出的內容陣列。
 
 ---
 
