@@ -16,6 +16,7 @@ async def save_task_result(task_id: str, result: Any) -> None:
 
 async def get_task_result_with_lock(task_id: str) -> Optional[Any]:
     """Retrieve and remove a task result atomically."""
+    print(f"Retrieving task result for {task_id}, current store len: {len(_task_result_store)}")
     async with _lock:
         return _task_result_store.pop(task_id, None)
 

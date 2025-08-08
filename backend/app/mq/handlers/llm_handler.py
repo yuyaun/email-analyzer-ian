@@ -54,7 +54,7 @@ def get_title_optimize_chain():
     # 建立 OpenAI LLM 介面
     llm = ChatOpenAI(
         model=settings.openai_model,
-        temperature=0,
+        temperature=0.5,
         api_key=settings.openai_api_key,
     )
 
@@ -91,6 +91,9 @@ async def process_llm_task(data: dict) -> dict:
         for _ in range(max(1, num))
     ]
     results = await asyncio.gather(*tasks)
+    
+    for result in results:
+        log_event("llm_handler", "unexpected_result", {"result": result})
 
     log_event("llm_handler", "raw_response", {"raw": results})
     return {
