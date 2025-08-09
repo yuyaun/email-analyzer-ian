@@ -40,21 +40,21 @@
       <h2 class="font-bold mb-2">✨ 魔法建議結果：</h2>
       <div v-if="result.magic_type === 'title_optimize'">
         <div v-for="(item, idx) in suggestions" :key="idx" class="mb-4">
-          <p class="font-bold">
+          <p class="font-bold flex items-center">
             標題：{{ item.title }}
             <button
               type="button"
-              class="ml-2 text-sm text-blue-600 underline"
+              class="ml-2 px-2 py-1 rounded bg-blue-500 text-white text-xs hover:bg-blue-700 transition"
               @click="copyToClipboard(item.title)"
             >
               複製
             </button>
           </p>
-          <p>
+          <p class="flex items-center">
             預覽文字：{{ item.preheader }}
             <button
               type="button"
-              class="ml-2 text-sm text-blue-600 underline"
+              class="ml-2 px-2 py-1 rounded bg-blue-500 text-white text-xs hover:bg-blue-700 transition"
               @click="copyToClipboard(item.preheader)"
             >
               複製
