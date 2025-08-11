@@ -12,16 +12,14 @@ flowchart TD
 
     subgraph API[Backend（FastAPI）]
         GW[FastAPI /api/public/v1/generate]
+        GW -- 抓取 WORKER 處理完成結果--> KQ
         JWT[JWT 驗證]
         RL[頻率限制/防濫用]
     end
 
-    subgraph MQ[Messaging]
-        KQ[(Kafka Topic)]
-    end
-
     subgraph Worker[LLM Worker]
         WK[Consumer：讀取任務]
+        WK -- 回傳處理結果 --> KQ
         LLM[OpenAI API]
     end
 
@@ -35,7 +33,6 @@ flowchart TD
     RL -- 允許 --> KQ
     KQ --> WK --> LLM
     WK --> DB
-    GW -. 取用結果/同步回傳 .-> DB
     GW --> FE --> CLIP
 
     %% 標註
