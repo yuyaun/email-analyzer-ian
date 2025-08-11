@@ -1,8 +1,8 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: llm-worker
-  namespace: your-namespace
 spec:
   replicas: 1
   selector:
@@ -14,28 +14,30 @@ spec:
         app: llm-worker
     spec:
       containers:
-      - name: llm-worker
-        image: your-registry/llm-worker:latest
-        imagePullPolicy: Always
-        envFrom:
-        - configMapRef:
-            name: llm-worker-config
-        resources:
-          requests:
-            cpu: "500m"
-            memory: "512Mi"
-          limits:
-            cpu: "1"
-            memory: "1Gi"
-        livenessProbe:
-          httpGet:
-            path: /healthz
-            port: 8080
-          initialDelaySeconds: 10
-          periodSeconds: 30
-        readinessProbe:
-          httpGet:
-            path: /healthz
-            port: 8080
-          initialDelaySeconds: 5
-          periodSeconds: 10
+        - name: llm-worker
+          image: "<REG>/llm-worker:<TAG>"
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: llm-worker-config
+            - secretRef:
+                name: llm-worker-secret
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
