@@ -1,6 +1,9 @@
 """FastAPI application entry point that wires routes and services."""
 
+import asyncio
 import os
+from contextlib import asynccontextmanager, suppress
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi.errors import RateLimitExceeded
@@ -22,8 +25,39 @@ async def init_db():
         await conn.run_sync(Base.metadata.create_all)
 
 
+def _cron_job_enabled() -> bool:
+    """Return True when scheduled jobs should run."""
+    return os.getenv("CRON_JOB", "false").lower() in {"1", "true", "yes"}
+
+
+def _consumer_enabled() -> bool:
+    """Return True when the Kafka consumer should run."""
+    return os.getenv("CONSUMER", "false").lower() in {"1", "true", "yes"}
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Manage optional background services during app lifespan."""
+    consumer_task = None
+    if _cron_job_enabled():
+        scheduler.start()
+    if _consumer_enabled():
+        from app.mq.consumer import consume_messages
+
+        consumer_task = asyncio.create_task(consume_messages())
+    try:
+        yield
+    finally:
+        if _cron_job_enabled():
+            scheduler.shutdown()
+        if consumer_task:
+            consumer_task.cancel()
+            with suppress(asyncio.CancelledError):
+                await consumer_task
+
+
 # Create the FastAPI application instance
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
@@ -40,13 +74,3 @@ app.add_middleware(
 # Read API prefix from environment for flexible deployment paths
 base_router = os.getenv("BASE_ROUTER", "")
 app.include_router(api_router, prefix=f"/{base_router}/api")
-
-
-def _cron_job_enabled() -> bool:
-    """Return True when scheduled jobs should run."""
-    return os.getenv("CRON_JOB", "false").lower() in {"1", "true", "yes"}
-
-
-if _cron_job_enabled():
-    # Start background scheduler based on environment configuration
-    scheduler.start()
