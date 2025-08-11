@@ -44,10 +44,12 @@ docker-compose up -d
 
 ```bash
 cd backend
-CRON_JOB=true uvicorn app.main:app --reload
+CRON_JOB=true CONSUMER=true uvicorn app.main:app --reload
 ```
 
-### 4. 啟動 Kafka 消費者（如需要）
+### 4. 啟動 Kafka 消費者（如未自動啟動）
+
+若未設定 `CONSUMER=true`，可手動啟動消費者：
 
 ```bash
 cd backend
