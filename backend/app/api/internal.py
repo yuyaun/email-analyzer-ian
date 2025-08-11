@@ -19,8 +19,8 @@ def readiness() -> dict:
 async def liveness() -> dict:
     """Check database and Kafka connectivity."""
     try:
-        with database.SessionLocal() as session:
-            session.execute(text("SELECT 1"))
+        async with database.AsyncSessionLocal() as session:
+            await session.execute(text("SELECT 1"))
         kafka = producer.KafkaProducer(
             bootstrap_servers=settings.kafka_bootstrap_servers,
         )
@@ -32,6 +32,7 @@ async def liveness() -> dict:
             detail=str(exc),
         ) from exc
     except Exception as exc:  # pragma: no cover - error path
+        print(f"Error during liveness check: {exc}")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Service unavailable",
