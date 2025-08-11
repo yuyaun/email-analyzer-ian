@@ -21,7 +21,18 @@
    kubectl -n <namespace> set image deployment/backend backend=<REG>/backend:<TAG>
    ```
 
-2. **建立命名空間與基礎服務**
+2. **建置並推送前端映像**
+
+   在部署前先從 `frontend/` 目錄建置 Docker 映像並推送至你的映像倉庫，並同步更新 `k8s/apps/frontend/deployment.yaml` 中的 `<REG>` 與 `<TAG>`。
+
+   ```bash
+   docker build -t <REG>/frontend:<TAG> frontend/
+   docker push <REG>/frontend:<TAG>
+   # 更新既有部署時可使用
+   kubectl -n <namespace> set image deployment/frontend frontend=<REG>/frontend:<TAG>
+   ```
+
+3. **建立命名空間與基礎服務**
 
    ```bash
    kubectl apply -f k8s/base/namespace.yaml
@@ -30,14 +41,14 @@
    kubectl apply -f k8s/base/ingress.yaml
    ```
 
-3. **部署後端與前端應用**
+4. **部署後端與前端應用**
 
    ```bash
    kubectl apply -f k8s/apps/backend/
    kubectl apply -f k8s/apps/frontend/
    ```
 
-4. **部署 LLM Worker**
+5. **部署 LLM Worker**
 
    ```bash
    kubectl apply -f k8s/llm-worker-config.yaml
@@ -45,7 +56,7 @@
    kubectl apply -f k8s/llm-worker-deployment.yaml
    ```
 
-5. **確認服務狀態**
+6. **確認服務狀態**
 
    ```bash
    kubectl get pods -n <namespace>
