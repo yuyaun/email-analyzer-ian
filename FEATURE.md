@@ -22,4 +22,4 @@
 | **快取層改為 Redis**            | 將 Memory Cache 替換為 Redis，支援分散式佈署與更大儲存空間        | 高     |
 | **LLM 增加 RAG 功能**           | 在 LLM 回覆中引入 RAG，讓回覆更具變化性與可控性                   | 中     |
 | **使用者操作行為追蹤與 RLHF**   | 追蹤 UI 操作行為與 Copy 按鈕點擊，蒐集回饋數據以實作 RLHF         | 中     |
-| **Kafka 與 PostgreSQL IaaS 化** | 將 Kafka 與 PostgreSQL 部署改為 IaaS 架構，提升可擴展性與維運效率 | 中     |
+| **Kafka 與 PostgreSQL PaaS 化** | 將 Kafka 與 PostgreSQL 部署改為 PaaS 架構，提升可擴展性與維運效率 | 中     |
