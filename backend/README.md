@@ -72,7 +72,7 @@ kafka-consumer-groups.sh --bootstrap-server localhost:9092 --list
 
 ```bash
 - `/api/internal/v1/readiness`：回傳服務是否準備完成
-- `/api/internal/v1/liveness`：檢查資料庫與 Kafka 連線，成功則回傳 `{"status": "ok"}`，失敗會回傳 503
+- `/api/internal/v1/liveness`：以最佳努力檢查資料庫與 Kafka 連線。無論檢查結果如何都回傳 `{"status": "ok"}`，若有失敗將在日誌記錄。
 - `/api/public/v1/jwt`：POST 請求，回傳編碼後的 JWT token
 ```
 
