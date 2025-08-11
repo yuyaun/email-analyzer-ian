@@ -18,11 +18,11 @@
 # 安裝依賴
 npm install
 
-# 設定 API 位置
-echo "API_URL=http://localhost:8000" > .env
-
-# 啟動開發伺服器 (http://localhost:8080)
+# Start development server (uses `.env.dev`)
 npm run dev
+
+# Build for production (uses `.env.prod`)
+npm run build
 ```
 
 ## 🗂️ 專案結構
