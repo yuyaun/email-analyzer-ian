@@ -1,0 +1,45 @@
+%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#1f2937", "primaryTextColor": "#fff", "lineColor": "#9ca3af", "tertiaryColor":"#111827"}}}%%
+%% 手動近似 redux 風格（若你的環境支援 `theme: redux`，可改用最下方版本） %%
+flowchart TD
+    %% 分群
+    subgraph Client[Frontend]
+        U[使用者]
+        FE[UI：輸入/上傳郵件、選擇魔法類型]
+        VAL[前端驗證：欄位/變更偵測/冷卻時間]
+        CLIP[複製建議內容]
+        U --> FE --> VAL
+    end
+
+    subgraph API[Backend（FastAPI）]
+        GW[FastAPI /api/public/v1/generate]
+        JWT[JWT 驗證]
+        RL[頻率限制/防濫用]
+    end
+
+    subgraph MQ[Messaging]
+        KQ[(Kafka Topic)]
+    end
+
+    subgraph Worker[LLM Worker]
+        WK[Consumer：讀取任務]
+        LLM[OpenAI API]
+    end
+
+    subgraph Data[Storage]
+        DB[(PostgreSQL)]
+    end
+
+    %% 流程
+    VAL -- OK 才送出 --> GW
+    GW --> JWT --> RL
+    RL -- 允許 --> KQ
+    KQ --> WK --> LLM
+    WK --> DB
+    GW -. 取用結果/同步回傳 .-> DB
+    GW --> FE --> CLIP
+
+    %% 標註
+    classDef subtle fill:#111827,stroke:#4b5563,color:#e5e7eb;
+    classDef io fill:#1f2937,stroke:#6b7280,color:#fff;
+    class Client,API,MQ,Worker,Data subtle;
+    class U,FE,VAL,CLIP,JWT,RL,WK,LLM,DB,KQ,GW io;
