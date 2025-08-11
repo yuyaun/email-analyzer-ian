@@ -16,7 +16,9 @@ Email Analyzer 是一個示範專案，展示如何結合 FastAPI、Kafka、Post
 .
 ├── agents/            # AI Agent 設定檔
 ├── backend/           # FastAPI 後端服務
-├── spec/              # 需求規格與技術文件
+├── frontend/          # 前端專案
+├── spec/              # 需求規格與技術文
+├── k8s/                # Kubernetes 配置檔
 ├── Architecture.svg   # 系統架構圖
 └── PROJECT_SCOPE.md   # 專案範圍與時程規劃
 ```
@@ -26,7 +28,7 @@ Email Analyzer 是一個示範專案，展示如何結合 FastAPI、Kafka、Post
 ### 1. 安裝依賴
 
 ```bash
-python3 -m venv .venv
+python -m venv .venv
 . .venv/bin/activate
 pip install -r backend/requirements.txt
 ```
@@ -54,6 +56,20 @@ CRON_JOB=true CONSUMER=true uvicorn app.main:app --reload
 ```bash
 cd backend
 python -m app.mq.consumer
+```
+
+## 5. 前端安裝與啟動
+
+```bash
+cd fontend
+# 安裝依賴
+npm install
+
+# Start development server (uses `.env.dev`)
+npm run dev
+
+# Build for production (uses `.env.prod`)
+npm run build
 ```
 
 ## 測試
