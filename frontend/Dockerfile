@@ -5,9 +5,12 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci || npm i
 COPY . .
-RUN npm run build
+ARG NODE_ENV=production
+ENV NODE_ENV=$NODE_ENV
 
+RUN npm run build -- --mode production
 
+# ---- Runtime ----
 FROM nginx:alpine
 WORKDIR /usr/share/nginx/html
 COPY --from=build /app/public ./
