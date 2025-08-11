@@ -4,9 +4,10 @@ from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
 import os
 
-load_dotenv(override=True)  # Override env vars with values from .env file
+load_dotenv()  # Override env vars with values from .env file
 env = os.getenv("ENV")
 app = os.getenv("APP_NAME")
+kafka = os.getenv("KAFKA_BOOTSTRAP_SERVERS")
 
 
 class Settings(BaseSettings):
@@ -14,7 +15,7 @@ class Settings(BaseSettings):
 
     # Compose topic names as `{ENV}.{object}.{action}`
     # Configure consumer groups as `{ENV}-{APP_NAME}`
-    kafka_bootstrap_servers: str = "localhost:9092"
+    kafka_bootstrap_servers: str = kafka
     kafka_topic: str = f"{env}.generate.created"
     kafka_result_topic: str = f"{env}.generate.result"
     kafka_consumer_group: str = f"{env}-{app}"
