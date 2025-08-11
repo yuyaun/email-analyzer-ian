@@ -3,13 +3,17 @@
 FROM node:18-alpine AS build
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
+RUN npm ci || npm i
 COPY . .
 RUN npm run build
 
-FROM node:18-alpine
-WORKDIR /app
+
+FROM nginx:alpine
+WORKDIR /usr/share/nginx/html
+COPY --from=build /app/public ./
 COPY --from=build /app/dist ./dist
-RUN npm install -g serve
+# 多加這行：把 dist/bundle.js 放到根目錄
+COPY --from=build /app/dist/bundle.js ./bundle.js
+
 EXPOSE 80
-CMD ["serve", "-s", "dist", "-l", "80"]
+CMD ["nginx", "-g", "daemon off;"]
