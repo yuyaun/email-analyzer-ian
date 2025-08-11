@@ -14,13 +14,13 @@
 
 ## 驗收條件（Acceptance Criteria）
 
-- [ ] 若輸入的「想要幾個點子」大於 3，則：
+- [x] 若輸入的「想要幾個點子」大於 3，則：
   - 不送出 API 請求
   - 顯示錯誤提示：`最多只能選 3 個點子唷！`
-- [ ] 若輸入的「郵件內容」少於 50 字，則：
+- [x] 若輸入的「郵件內容」少於 50 字，則：
   - 不送出 API 請求
   - 顯示錯誤提示：`字太少囉！至少給 50 個字才能發揮魔法～`
-- [ ] 當按下「用魔法打敗魔法」並成功取得回應後，顯示區塊「✨ 魔法建議結果：」
+- [x] 當按下「用魔法打敗魔法」並成功取得回應後，顯示區塊「✨ 魔法建議結果：」
   - `magic_type = title_optimize` 每一筆建議結果顯示：
     - 標題：`title`
     - 預覽文字：`preheader`
@@ -46,8 +46,6 @@
 {
   "magic_type": "title_optimize",
   "status": "done",
-  "result": [
-    { "title": "string", "preheader": "string" }
-  ]
+  "result": [{ "title": "string", "preheader": "string" }]
 }
 ```
