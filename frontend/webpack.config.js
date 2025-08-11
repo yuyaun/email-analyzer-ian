@@ -2,6 +2,9 @@ const path = require('path');
 const { VueLoaderPlugin } = require('vue-loader');
 const Dotenv = require('dotenv-webpack');
 
+// Pick environment-specific config file based on build mode
+const envFile = process.env.NODE_ENV === 'production' ? '.env.prod' : '.env.dev';
+
 module.exports = {
   entry: './src/main.js',
   output: {
@@ -26,7 +29,10 @@ module.exports = {
       }
     ],
   },
-  plugins: [new VueLoaderPlugin(), new Dotenv()],
+  plugins: [
+    new VueLoaderPlugin(),
+    new Dotenv({ path: path.resolve(__dirname, envFile) }),
+  ],
   resolve: {
     alias: {
       vue: 'vue/dist/vue.esm-bundler.js'
