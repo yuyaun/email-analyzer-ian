@@ -29,6 +29,8 @@ spec:
           value: "0@localhost:9093"
         - name: KAFKA_CFG_ADVERTISED_LISTENERS
           value: "PLAINTEXT://kafka:9092"
+        - name: KAFKA_CFG_CONTROLLER_LISTENER_NAMES
+          value: "CONTROLLER"
         ports:
         - containerPort: 9092
         - containerPort: 9093

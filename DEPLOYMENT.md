@@ -35,23 +35,23 @@
 
    ```bash
    kubectl apply -f k8s/base/namespace.yaml
-   kubectl apply -f k8s/base/postgres/
-   kubectl apply -f k8s/base/kafka/
-   kubectl apply -f k8s/base/ingress.yaml
+   kubectl apply -f k8s/base/postgres/ -n email-analyzer
+   kubectl apply -f k8s/base/kafka/ -n email-analyzer
+   kubectl apply -f k8s/base/ingress.yaml -n email-analyzer
    ```
 
-4. **部署後端與前端應用**
+   4. **部署後端與前端應用**
 
    ```bash
-   kubectl apply -f k8s/apps/backend/
-   kubectl apply -f k8s/apps/frontend/
+   kubectl apply -f k8s/apps/backend/ -n email-analyzer
+   kubectl apply -f k8s/apps/frontend/ -n email-analyzer
    ```
 
-5. **確認服務狀態**
+   5. **確認服務狀態**
 
    ```bash
-   kubectl get pods -n <namespace>
-   kubectl get svc  -n <namespace>
+   kubectl get pods -n email-analyzer
+   kubectl get svc  -n email-analyzer
    ```
 
 ## 自訂設定
@@ -59,4 +59,3 @@
 - 修改各 `configmap.yaml` 或 `secret.yaml` 以調整環境變數、憑證等設定。
 - 可在 `deployment.yaml` 中調整 `replicas` 與 `resources` 以符合資源需求。
 - 若需自訂網域，請更新 `k8s/base/ingress.yaml` 中的 `host` 設定。
-

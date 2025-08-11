@@ -16,19 +16,30 @@ spec:
       containers:
       - name: postgres
         image: postgres:15
+        env:
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
         envFrom:
         - secretRef:
-            name: postgres-secret
+            name: postgres-secret # 這裡包含 POSTGRES_DB/USER/PASSWORD
         ports:
         - containerPort: 5432
         volumeMounts:
         - name: data
-          mountPath: /var/lib/postgresql/data
+          mountPath: /var/lib/postgresql/data # 掛在父目錄，不是 pgdata
+        readinessProbe:
+          exec: { command: [ "pg_isready", "-U", "postgres" ] }
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        livenessProbe:
+          tcpSocket: { port: 5432 }
+          initialDelaySeconds: 30
+          periodSeconds: 10
   volumeClaimTemplates:
   - metadata:
       name: data
     spec:
-      accessModes: ["ReadWriteOnce"]
+      accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
           storage: 1Gi

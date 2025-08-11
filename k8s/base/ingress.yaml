@@ -4,7 +4,7 @@ metadata:
   name: email-analyzer
 spec:
   rules:
-  - host: <domain>
+  - host: example.com
     http:
       paths:
       - path: /email-analyzer/api
