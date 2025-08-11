@@ -9,6 +9,7 @@
 | RequirementAgent | 需求分析與功能規劃                 | `agents/RequirementAgent.md` | `/spec`     |
 | BackendAgent     | 後端核心元件設計與維護             | `agents/Backend.md`          | `/backend`  |
 | FrontendAgent    | 前端開發與 Vue.js 整合             | `agents/FrontendAgent.md`    | `/frontend` |
+| KubectlAgent     | Kubernetes 部署與管理              | `agents/KubectlAgent.md`     | `/k8s`      |
 | TestGenie        | 自動產生 pytest 測試               | `agents/TestGenie.md`        | `all`       |
 | BugHunter        | 偵錯與分析程式錯誤                 | `agents/BugHunter.md`        | `all`       |
 | DocsBot          | 撰寫 README、docstring、文件產生器 | `agents/DocsBot.md`          | `all`       |
