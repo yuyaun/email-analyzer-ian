@@ -6,7 +6,6 @@
 
 - 已安裝 `kubectl` 並連線至目標叢集。
 - 可以存取 Docker 映像倉庫，並替換清單中的 `<REG>` 與 `<TAG>` 等占位符。
-- 在 `k8s/llm-worker-secret.yaml` 中填入有效的 `OPENAI_API_KEY` 與資料庫連線字串。
 
 ## 部署步驟
 
@@ -48,15 +47,7 @@
    kubectl apply -f k8s/apps/frontend/
    ```
 
-5. **部署 LLM Worker**
-
-   ```bash
-   kubectl apply -f k8s/llm-worker-config.yaml
-   kubectl apply -f k8s/llm-worker-secret.yaml
-   kubectl apply -f k8s/llm-worker-deployment.yaml
-   ```
-
-6. **確認服務狀態**
+5. **確認服務狀態**
 
    ```bash
    kubectl get pods -n <namespace>
